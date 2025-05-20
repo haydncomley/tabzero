@@ -8,7 +8,7 @@ import reactHooksPlugin from 'eslint-plugin-react-hooks';
 
 export default [
 	{
-		ignores: ['node_modules', 'dist', 'dist-electron'],
+		ignores: ['node_modules', 'dist', 'dist-electron', 'vite.config.ts'],
 	},
 	// Base configuration for all files
 	{
@@ -21,11 +21,6 @@ export default [
 			'react-hooks': reactHooksPlugin,
 		},
 		settings: {
-			'import/resolver': {
-				node: {
-					extensions: ['.js', '.jsx', '.ts', '.tsx'],
-				},
-			},
 			react: {
 				version: 'detect',
 			},
@@ -49,7 +44,7 @@ export default [
 					],
 					pathGroups: [
 						{
-							pattern: '@/**',
+							pattern: '~/**',
 							group: 'internal',
 						},
 					],
@@ -100,6 +95,9 @@ export default [
 			'import/resolver': {
 				typescript: {
 					project: './tsconfig.json',
+				},
+				node: {
+					extensions: ['.js', '.jsx', '.ts', '.tsx'],
 				},
 			},
 		},
