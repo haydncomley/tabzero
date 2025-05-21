@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -69,13 +69,36 @@ app.on('activate', () => {
 	}
 });
 
-app.on('open-url', (event, rawUrl) => {
+app.on('open-url', async (event, rawUrl) => {
 	event.preventDefault();
-	console.log('open-url', rawUrl);
+	const url = new URL(rawUrl);
+	if (!url.protocol.startsWith('tabzero')) return;
+
+	const searchParams = new URLSearchParams(url.search);
+	const code = searchParams.get('code');
+	const scope = searchParams.get('scope');
+
+	if (!code || !scope) return;
+
+	const repsonse = await fetch(
+		`https://authtwitchcallback-xcnznm7gbq-uc.a.run.app/authTwitchCallback?code=${code}`,
+	);
+	const data = await repsonse.json();
+
+	if (!data.token || !data.twitch) {
+		// Handle login failure
+		return;
+	}
+
+	win?.webContents.send('auth', data);
   });
   
 
 app.setAsDefaultProtocolClient('tabzero');
 
 app.whenReady().then(createWindow);
+
+ipcMain.handle('open-external', (_e, url) => {
+	return shell.openExternal(url);
+  });
 

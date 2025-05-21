@@ -16,7 +16,10 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   invoke(...args) {
     const [channel, ...omit] = args;
     return electron.ipcRenderer.invoke(channel, ...omit);
-  }
+  },
   // You can expose other APTs you need here.
   // ...
+  openExternal(url) {
+    return electron.ipcRenderer.invoke("open-external", url);
+  }
 });

@@ -1,10 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import {
-	GoogleAuthProvider,
-	signInWithPopup,
-	signOut,
-	signInWithCustomToken,
-} from 'firebase/auth';
+import { signOut, signInWithCustomToken } from 'firebase/auth';
 
 import { auth } from '../../main';
 
@@ -24,16 +19,34 @@ export const useAuth = () => {
 		initialData: auth.currentUser,
 	});
 
+	console.log(user);
+
 	const { mutateAsync: login, isPending: isLoggingIn } = useMutation({
-		mutationFn: async () => {
-			// const provider = new GoogleAuthProvider();
-			// const result = await signInWithPopup(auth, provider);
-			const result = await signInWithCustomToken(
-				auth,
-				'm7sz9p9gcnoq0vdpnh7kpj8hiqy9f7',
-			);
-			return result.user;
-		},
+		mutationFn: () =>
+			new Promise((res, rej) => {
+				// TODO: Dynamic scopes from the lib
+				(window as any).ipcRenderer.openExternal(
+					'https://authtwitch-xcnznm7gbq-uc.a.run.app?scopes=chat:edit+channel:manage:broadcast+moderator:manage:chat_settings+clips:edit+chat:read+moderator:manage:banned_users',
+				);
+
+				// TODO: Clean this up
+				(window as any).ipcRenderer.on(
+					'auth',
+					(
+						_e: any,
+						data: {
+							token: string;
+							twitch: {
+								access_token: string;
+								refresh_token: string;
+								scope: string[];
+							};
+						},
+					) => {
+						signInWithCustomToken(auth, data.token).then(res).catch(rej);
+					},
+				);
+			}),
 	});
 
 	const { mutateAsync: logout, isPending: isLoggingOut } = useMutation({
