@@ -1,9 +1,13 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { initLinkHandler } from './lib/external-link-handler';
-import { initAuthRedirectHandler } from './lib/auth-redirect-handler';
+import {
+	handleProtocolUrl,
+	initAuthRedirectHandler,
+	PROTOCOL,
+} from './lib/auth-redirect-handler';
 import { initHotkeyHandler } from './lib/hotkey-handler';
 
 // @ts-expect-error - createRequire is not supported in Node.js 20
@@ -37,6 +41,7 @@ function createWindow() {
 		icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
 		webPreferences: {
 			preload: path.join(__dirname, 'preload.mjs'),
+			devTools: true,
 		},
 		autoHideMenuBar: true,
 	});
@@ -54,7 +59,7 @@ function createWindow() {
 	}
 
 	initAuthRedirectHandler(win);
-	initHotkeyHandler(win)
+	initHotkeyHandler(win);
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -77,5 +82,27 @@ app.on('activate', () => {
 
 initLinkHandler();
 
-app.whenReady().then(createWindow);
+if (!app.requestSingleInstanceLock()) {
+	app.quit();
+} else {
+	const handleArgs = async (argv: string[]) => {
+		if (!win) return;
+		const url = argv.find((arg) => arg.startsWith(`${PROTOCOL}://`));
+		if (!url) return;
+		handleProtocolUrl(win, url);
+	};
 
+	app.on('second-instance', (_event, argv) => {
+		handleArgs(argv);
+
+		if (win) {
+			if (win.isMinimized()) win.restore();
+			win.focus();
+		}
+	});
+
+	app.whenReady().then(() => {
+		createWindow();
+		handleArgs(process.argv);
+	});
+}

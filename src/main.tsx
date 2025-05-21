@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAnalytics } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, getFirestore } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -53,6 +53,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 );
 
 // Use contextBridge
-window.ipcRenderer.on('main-process-message', (_event, message) => {
-	console.log(message);
-});
+(window as any).ipcRenderer.on(
+	'main-process-message',
+	(_event: any, message: any) => {
+		console.log(_event, message);
+	},
+);

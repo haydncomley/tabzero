@@ -6,7 +6,7 @@ import { useAuth } from '~/hooks/use-auth';
 
 export default function Page() {
 	const navigate = useNavigate();
-	const { ready, user, logout, isLoggingIn } = useAuth();
+	const { ready, user, logout, isLoggingOut } = useAuth();
 
 	useEffect(() => {
 		if (!ready || user) return;
@@ -23,7 +23,7 @@ export default function Page() {
 				<div>
 					<Button
 						onClick={() => logout()}
-						loading={isLoggingIn}
+						loading={isLoggingOut}
 					>
 						Logout
 					</Button>
