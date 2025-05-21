@@ -1,7 +1,9 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { signOut, signInWithCustomToken } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 
-import { auth } from '../../main';
+import { auth, firestore } from '../../main';
+import { userConverter } from './lib/converters';
 
 export const useAuth = () => {
 	const { data: ready } = useQuery({
@@ -19,7 +21,20 @@ export const useAuth = () => {
 		initialData: auth.currentUser,
 	});
 
-	console.log(user);
+	const { data: userDetails } = useQuery({
+		queryKey: ['user', user?.uid],
+		queryFn: async () => {
+			if (!user?.uid) return null;
+
+			const userRef = doc(firestore, 'users', user.uid).withConverter(
+				userConverter,
+			);
+			const userSnap = await getDoc(userRef);
+			return userSnap.exists() ? userSnap.data() : null;
+		},
+		initialData: null,
+		enabled: !!user?.uid,
+	});
 
 	const { mutateAsync: login } = useMutation({
 		mutationFn: () =>
@@ -59,7 +74,18 @@ export const useAuth = () => {
 		login,
 		logout,
 		isLoggingOut,
-		user,
 		ready,
+		user,
+		userDetails,
+		details: userDetails
+			? {
+					id: userDetails.providers[userDetails.provider].id,
+					user_name: userDetails.providers[userDetails.provider].login,
+					display_name:
+						userDetails.providers[userDetails.provider].display_name,
+					profile_image:
+						userDetails.providers[userDetails.provider].profile_image_url,
+				}
+			: null,
 	};
 };

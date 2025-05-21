@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAnalytics } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, getFirestore } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -32,11 +33,12 @@ const app = initializeApp(firebaseConfig);
 export const analytics = getAnalytics(app);
 export const auth = getAuth(app);
 export const functions = getFunctions(app);
+export const firestore = getFirestore(app);
 
 // Initialize React Query
 export const queryClient = new QueryClient();
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
 	queryClient.setQueryData(['user'], user);
 });
 
