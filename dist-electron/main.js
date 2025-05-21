@@ -1,7 +1,47 @@
-import { app, BrowserWindow, ipcMain, shell } from "electron";
+import { ipcMain, shell, app, globalShortcut, BrowserWindow } from "electron";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+const initLinkHandler = () => {
+  ipcMain.handle("open-external", (_e, url) => {
+    return shell.openExternal(url);
+  });
+};
+const PROTOCOL = "tabzero";
+const initAuthRedirectHandler = (window) => {
+  app.setAsDefaultProtocolClient(PROTOCOL);
+  app.on("open-url", async (event, rawUrl) => {
+    event.preventDefault();
+    const url = new URL(rawUrl);
+    console.log("Got URL", rawUrl);
+    if (!url.protocol.startsWith(PROTOCOL)) return;
+    const searchParams = new URLSearchParams(url.search);
+    const code = searchParams.get("code");
+    const scope = searchParams.get("scope");
+    if (!code || !scope) return;
+    const repsonse = await fetch(
+      `https://authtwitchcallback-xcnznm7gbq-uc.a.run.app/authTwitchCallback?code=${code}`
+    );
+    const data = await repsonse.json();
+    if (!data.token || !data.twitch) {
+      return;
+    }
+    window.webContents.send("auth", data);
+  });
+};
+const initHotkeyHandler = (window) => {
+  const hotkeys = {};
+  ipcMain.handle("register-hotkey", (_e, options) => {
+    console.log("New Hotkey");
+    const previous = hotkeys[options.name];
+    if (previous) globalShortcut.unregister(previous);
+    hotkeys[options.name] = options.keys;
+    globalShortcut.register(options.keys, () => {
+      console.log(`[Hotkey] ${options.name}`);
+      window.webContents.send("hotkey", options.name);
+    });
+  });
+};
 createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path.join(__dirname, "..");
@@ -26,6 +66,8 @@ function createWindow() {
   } else {
     win.loadFile(path.join(RENDERER_DIST, "index.html"));
   }
+  initAuthRedirectHandler(win);
+  initHotkeyHandler(win);
 }
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
@@ -38,28 +80,8 @@ app.on("activate", () => {
     createWindow();
   }
 });
-app.on("open-url", async (event, rawUrl) => {
-  event.preventDefault();
-  const url = new URL(rawUrl);
-  if (!url.protocol.startsWith("tabzero")) return;
-  const searchParams = new URLSearchParams(url.search);
-  const code = searchParams.get("code");
-  const scope = searchParams.get("scope");
-  if (!code || !scope) return;
-  const repsonse = await fetch(
-    `https://authtwitchcallback-xcnznm7gbq-uc.a.run.app/authTwitchCallback?code=${code}`
-  );
-  const data = await repsonse.json();
-  if (!data.token || !data.twitch) {
-    return;
-  }
-  win == null ? void 0 : win.webContents.send("auth", data);
-});
-app.setAsDefaultProtocolClient("tabzero");
+initLinkHandler();
 app.whenReady().then(createWindow);
-ipcMain.handle("open-external", (_e, url) => {
-  return shell.openExternal(url);
-});
 export {
   MAIN_DIST,
   RENDERER_DIST,

@@ -3,11 +3,13 @@ import { Loader2 } from 'lucide-react';
 
 type ButtonProps = {
 	loading?: boolean;
+	variant?: 'twitch';
 } & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const Button = ({
 	className,
 	loading,
+	variant,
 	children,
 	...props
 }: ButtonProps) => (
@@ -15,8 +17,10 @@ export const Button = ({
 		{...props}
 		className={classNames(
 			className,
-			'bg-brand border-brand-glint relative flex items-center justify-center gap-2 rounded-2xl border p-2 px-5 font-medium transition-all duration-150 hover:cursor-pointer',
+			'relative flex items-center justify-center gap-2 rounded-2xl border p-2 px-5 font-medium transition-all duration-150 hover:cursor-pointer',
 			{
+				'bg-brand border-brand-glint': !variant,
+				'bg-twitch border-twitch-glint': variant === 'twitch',
 				'text-brand-foreground/0': loading,
 			},
 		)}

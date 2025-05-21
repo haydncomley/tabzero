@@ -21,5 +21,8 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   // ...
   openExternal(url) {
     return electron.ipcRenderer.invoke("open-external", url);
+  },
+  registerHotkey(options) {
+    return electron.ipcRenderer.invoke("register-hotkey", options);
   }
 });

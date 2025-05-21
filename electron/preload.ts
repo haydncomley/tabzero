@@ -24,4 +24,7 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   openExternal(url: string) {
     return ipcRenderer.invoke('open-external', url)
   },
+  registerHotkey(options: { name: string, keys: string }) {
+    return ipcRenderer.invoke('register-hotkey', options)
+  },
 })

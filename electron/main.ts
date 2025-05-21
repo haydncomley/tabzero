@@ -1,7 +1,10 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { initLinkHandler } from './lib/external-link-handler';
+import { initAuthRedirectHandler } from './lib/auth-redirect-handler';
+import { initHotkeyHandler } from './lib/hotkey-handler';
 
 // @ts-expect-error - createRequire is not supported in Node.js 20
 const require = createRequire(import.meta.url);
@@ -49,6 +52,9 @@ function createWindow() {
 		// win.loadFile('dist/index.html')
 		win.loadFile(path.join(RENDERER_DIST, 'index.html'));
 	}
+
+	initAuthRedirectHandler(win);
+	initHotkeyHandler(win)
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -69,36 +75,7 @@ app.on('activate', () => {
 	}
 });
 
-app.on('open-url', async (event, rawUrl) => {
-	event.preventDefault();
-	const url = new URL(rawUrl);
-	if (!url.protocol.startsWith('tabzero')) return;
-
-	const searchParams = new URLSearchParams(url.search);
-	const code = searchParams.get('code');
-	const scope = searchParams.get('scope');
-
-	if (!code || !scope) return;
-
-	const repsonse = await fetch(
-		`https://authtwitchcallback-xcnznm7gbq-uc.a.run.app/authTwitchCallback?code=${code}`,
-	);
-	const data = await repsonse.json();
-
-	if (!data.token || !data.twitch) {
-		// Handle login failure
-		return;
-	}
-
-	win?.webContents.send('auth', data);
-  });
-  
-
-app.setAsDefaultProtocolClient('tabzero');
+initLinkHandler();
 
 app.whenReady().then(createWindow);
-
-ipcMain.handle('open-external', (_e, url) => {
-	return shell.openExternal(url);
-  });
 

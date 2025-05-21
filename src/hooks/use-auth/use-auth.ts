@@ -21,7 +21,7 @@ export const useAuth = () => {
 
 	console.log(user);
 
-	const { mutateAsync: login, isPending: isLoggingIn } = useMutation({
+	const { mutateAsync: login } = useMutation({
 		mutationFn: () =>
 			new Promise((res, rej) => {
 				// TODO: Dynamic scopes from the lib
@@ -57,7 +57,6 @@ export const useAuth = () => {
 
 	return {
 		login,
-		isLoggingIn,
 		logout,
 		isLoggingOut,
 		user,

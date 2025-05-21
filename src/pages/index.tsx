@@ -6,7 +6,7 @@ import { useAuth } from '~/hooks/use-auth';
 
 export default function Page() {
 	const navigate = useNavigate();
-	const { ready, user, login, isLoggingIn } = useAuth();
+	const { ready, user, login } = useAuth();
 
 	useEffect(() => {
 		if (!ready || !user) return;
@@ -25,9 +25,10 @@ export default function Page() {
 			<div className="flex items-center justify-center gap-4">
 				<Button
 					onClick={() => login()}
-					loading={isLoggingIn || !ready}
+					loading={!ready}
+					variant="twitch"
 				>
-					Log in with Google
+					Log in with Twitch
 				</Button>
 			</div>
 		</main>

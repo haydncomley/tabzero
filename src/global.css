@@ -7,6 +7,9 @@
 	--color-brand: #ff8600;
 	--color-brand-glint: #ffa541;
 	--color-brand-foreground: #ffffff;
+
+	--color-twitch: #9146ff;
+	--color-twitch-glint: #a86cff;
 }
 
 /* Always dark mode for now, will do themes later */
