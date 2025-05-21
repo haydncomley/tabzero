@@ -1,4 +1,3 @@
-/* eslint-disable import/order */
 import { Suspense } from 'react';
 import { useRoutes } from 'react-router-dom';
 

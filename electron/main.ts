@@ -69,4 +69,13 @@ app.on('activate', () => {
 	}
 });
 
+app.on('open-url', (event, rawUrl) => {
+	event.preventDefault();
+	console.log('open-url', rawUrl);
+  });
+  
+
+app.setAsDefaultProtocolClient('tabzero');
+
 app.whenReady().then(createWindow);
+

@@ -1,5 +1,10 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import {
+	GoogleAuthProvider,
+	signInWithPopup,
+	signOut,
+	signInWithCustomToken,
+} from 'firebase/auth';
 
 import { auth } from '../../main';
 
@@ -21,8 +26,12 @@ export const useAuth = () => {
 
 	const { mutateAsync: login, isPending: isLoggingIn } = useMutation({
 		mutationFn: async () => {
-			const provider = new GoogleAuthProvider();
-			const result = await signInWithPopup(auth, provider);
+			// const provider = new GoogleAuthProvider();
+			// const result = await signInWithPopup(auth, provider);
+			const result = await signInWithCustomToken(
+				auth,
+				'm7sz9p9gcnoq0vdpnh7kpj8hiqy9f7',
+			);
 			return result.user;
 		},
 	});
