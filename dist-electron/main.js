@@ -1,76 +1,126 @@
-import { ipcMain as p, shell as g, app as r, globalShortcut as u, BrowserWindow as h } from "electron";
-import { createRequire as P } from "node:module";
-import { fileURLToPath as v } from "node:url";
-import c from "node:path";
-const k = () => {
-  p.handle("open-external", (s, t) => g.openExternal(t));
-}, d = "tabzero", m = async (s, t) => {
-  const o = new URL(t);
-  if (!o.protocol.startsWith(d)) return "not a valid url";
-  const n = new URLSearchParams(o.search), a = n.get("code"), _ = n.get("scope");
-  if (!a || !_) return "no scope or code";
-  const i = await (await fetch(
-    `https://authtwitchcallback-xcnznm7gbq-uc.a.run.app/authTwitchCallback?code=${a}`
-  )).json();
-  if (!i.token || !i.twitch)
-    return "token and twitch not found";
-  s.webContents.send("auth", i);
-}, T = (s) => {
-  r.setAsDefaultProtocolClient(d), r.on("open-url", async (t, o) => {
-    m(s, o);
-  });
-}, E = (s) => {
-  const t = {};
-  p.handle("register-hotkey", (o, n) => {
-    console.log("New Hotkey");
-    const a = t[n.name];
-    a && u.unregister(a), t[n.name] = n.keys, u.register(n.keys, () => {
-      console.log(`[Hotkey] ${n.name}`), s.webContents.send("hotkey", n.name);
-    });
+import { ipcMain, shell, app, globalShortcut, BrowserWindow } from "electron";
+import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+const initLinkHandler = () => {
+  ipcMain.handle("open-external", (_e, url) => {
+    return shell.openExternal(url);
   });
 };
-P(import.meta.url);
-const f = c.dirname(v(import.meta.url));
-process.env.APP_ROOT = c.join(f, "..");
-const l = process.env.VITE_DEV_SERVER_URL, A = c.join(process.env.APP_ROOT, "dist-electron"), w = c.join(process.env.APP_ROOT, "dist");
-process.env.VITE_PUBLIC = l ? c.join(process.env.APP_ROOT, "public") : w;
-let e;
-function R() {
-  e = new h({
-    icon: c.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+const PROTOCOL = "tabzero";
+const handleProtocolUrl = async (window, rawUrl) => {
+  const url = new URL(rawUrl);
+  if (!url.protocol.startsWith(PROTOCOL)) return "not a valid url";
+  const searchParams = new URLSearchParams(url.search);
+  const code = searchParams.get("code");
+  const scope = searchParams.get("scope");
+  if (!code || !scope) return "no scope or code";
+  const repsonse = await fetch(
+    `https://authtwitchcallback-xcnznm7gbq-uc.a.run.app/authTwitchCallback?code=${code}`
+  );
+  const data = await repsonse.json();
+  if (!data.token || !data.twitch) {
+    return "token and twitch not found";
+  }
+  window.webContents.send("auth", data);
+};
+const initAuthRedirectHandler = (window) => {
+  app.setAsDefaultProtocolClient(PROTOCOL);
+  app.on("open-url", async (_event, rawUrl) => {
+    handleProtocolUrl(window, rawUrl);
+  });
+};
+const isValidAccelerator = (accelerator) => {
+  try {
+    globalShortcut.register(accelerator, () => {
+    });
+    globalShortcut.unregister(accelerator);
+    return true;
+  } catch {
+    return false;
+  }
+};
+const initHotkeyHandler = (window) => {
+  const hotkeys = {};
+  ipcMain.handle("register-hotkey", (_e, options) => {
+    console.log("New Hotkey");
+    if (!isValidAccelerator(options.keys)) {
+      console.error(`[Hotkey] Invalid accelerator: ${options.keys}`);
+      return false;
+    }
+    const previous = hotkeys[options.name];
+    if (previous) globalShortcut.unregister(previous);
+    hotkeys[options.name] = options.keys;
+    globalShortcut.register(options.keys, () => {
+      console.log(`[Hotkey] ${options.name}`);
+      window.webContents.send("hotkey", options.name);
+    });
+    return true;
+  });
+};
+createRequire(import.meta.url);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+process.env.APP_ROOT = path.join(__dirname, "..");
+const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
+const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
+const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
+process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
+let win;
+function createWindow() {
+  win = new BrowserWindow({
+    icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
-      preload: c.join(f, "preload.mjs"),
-      devTools: !0
+      preload: path.join(__dirname, "preload.mjs"),
+      devTools: true
     },
-    autoHideMenuBar: !0
-  }), e.webContents.on("did-finish-load", () => {
-    e == null || e.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
-  }), l ? e.loadURL(l) : e.loadFile(c.join(w, "index.html")), T(e), E(e);
+    autoHideMenuBar: true
+  });
+  win.webContents.on("did-finish-load", () => {
+    win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
+  });
+  if (VITE_DEV_SERVER_URL) {
+    win.loadURL(VITE_DEV_SERVER_URL);
+  } else {
+    win.loadFile(path.join(RENDERER_DIST, "index.html"));
+  }
+  initAuthRedirectHandler(win);
+  initHotkeyHandler(win);
 }
-r.on("window-all-closed", () => {
-  process.platform !== "darwin" && (r.quit(), e = null);
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+    win = null;
+  }
 });
-r.on("activate", () => {
-  h.getAllWindows().length === 0 && R();
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
 });
-k();
-const L = r.requestSingleInstanceLock();
-if (!L)
-  r.quit();
-else {
-  const s = async (t) => {
-    if (!e) return;
-    const o = t.find((n) => n.startsWith(`${d}://`));
-    o && m(e, o);
+initLinkHandler();
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  const handleArgs = async (argv) => {
+    if (!win) return;
+    const url = argv.find((arg) => arg.startsWith(`${PROTOCOL}://`));
+    if (!url) return;
+    handleProtocolUrl(win, url);
   };
-  r.on("second-instance", (t, o) => {
-    s(o), e && (e.isMinimized() && e.restore(), e.focus());
-  }), r.whenReady().then(() => {
-    R(), s(process.argv);
+  app.on("second-instance", (_event, argv) => {
+    handleArgs(argv);
+    if (win) {
+      if (win.isMinimized()) win.restore();
+      win.focus();
+    }
+  });
+  app.whenReady().then(() => {
+    createWindow();
+    handleArgs(process.argv);
   });
 }
 export {
-  A as MAIN_DIST,
-  w as RENDERER_DIST,
-  l as VITE_DEV_SERVER_URL
+  MAIN_DIST,
+  RENDERER_DIST,
+  VITE_DEV_SERVER_URL
 };

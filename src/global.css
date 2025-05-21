@@ -3,10 +3,14 @@
 @theme {
 	--color-background: #181818;
 	--color-foreground: #f5f5f5;
+	--color-outline: #2c2c2c;
 
 	--color-brand: #ff8600;
 	--color-brand-glint: #ffa541;
 	--color-brand-foreground: #ffffff;
+
+	--color-danger: #cd412b;
+	--color-danger-glint: #f5563d;
 
 	--color-twitch: #9146ff;
 	--color-twitch-glint: #a86cff;
@@ -21,6 +25,12 @@
 		}
 	}
 } */
+
+@layer base {
+	* {
+		@apply border-[var(--color-outline)];
+	}
+}
 
 html,
 body,

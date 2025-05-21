@@ -19,7 +19,6 @@ export const userConverter: FirestoreDataConverter<tabzeroUser> = {
 		const data = snapshot.data();
 		let timestamp_last: Date | undefined = undefined;
 		let timestamp_created: Date | undefined = undefined;
-		console.log('Converting', data);
 
 		if (data.timestamp_last instanceof Timestamp)
 			timestamp_last = data.timestamp_last.toDate();
