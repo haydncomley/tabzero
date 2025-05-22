@@ -1,13 +1,22 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import classNames from 'classnames';
+import { httpsCallable } from 'firebase/functions';
 import { useEffect, useState } from 'react';
 
 import { Button } from '~/components/button';
-import { useAuth } from '~/hooks/use-auth';
 import { useHotkey } from '~/hooks/use-hotkey';
 
+import { functions } from '../../main';
+
+const blobToBase64 = (blob: Blob): Promise<string> =>
+	new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
+		reader.onerror = reject;
+		reader.readAsDataURL(blob);
+	});
+
 export default function Page() {
-	const { details } = useAuth();
 	const [isRecording, setIsRecording] = useState(false);
 	const [selectedDevice, setSelectedDevice] = useState<MediaStreamTrack | null>(
 		null,
@@ -49,11 +58,22 @@ export default function Page() {
 				if (event.data.size > 0) recordedChunks.push(event.data);
 			};
 
-			mediaRecorder.onstop = () => {
-				const blob = new Blob(recordedChunks, { type: 'audio/wav' });
+			mediaRecorder.onstop = async () => {
+				const blob = new Blob(recordedChunks, { type: 'audio/ogg' });
 				const url = URL.createObjectURL(blob);
 				const audio = new Audio(url);
 				audio.play();
+
+				const aiTranscribe = httpsCallable<{ audio: string }, { text: string }>(
+					functions,
+					'aiTranscribe',
+				);
+
+				const { data } = await aiTranscribe({
+					audio: await blobToBase64(blob),
+				});
+
+				console.log(data.text);
 			};
 
 			mediaRecorder.start();
@@ -67,6 +87,24 @@ export default function Page() {
 			}
 		};
 	}, [isRecording]);
+
+	const { mutate } = useMutation({
+		mutationFn: async () => {
+			const aiTest = httpsCallable<{ prompt: string }, { tools: any }>(
+				functions,
+				'aiToolResolver',
+			);
+
+			const { data } = await aiTest({
+				prompt:
+					'Set my chat to be emote only, and update my title to be "Hello, world!"',
+			});
+
+			console.log(data.tools);
+
+			return data;
+		},
+	});
 
 	return (
 		<main className="p-4">
@@ -101,6 +139,7 @@ export default function Page() {
 				<Button onClick={() => setIsRecording((prev) => !prev)}>
 					{isRecording ? 'Stop' : 'Start'}
 				</Button>
+				<Button onClick={() => mutate()}>Hellio world</Button>
 			</div>
 		</main>
 	);

@@ -3,9 +3,13 @@ import './global.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAnalytics } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getFunctions } from 'firebase/functions';
+import {
+	connectAuthEmulator,
+	getAuth,
+	onAuthStateChanged,
+} from 'firebase/auth';
+import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
+import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { HashRouter } from 'react-router-dom';
@@ -35,10 +39,15 @@ export const auth = getAuth(app);
 export const functions = getFunctions(app);
 export const firestore = getFirestore(app);
 
+connectAuthEmulator(auth, 'http://localhost:9099');
+connectFunctionsEmulator(functions, 'localhost', 5001);
+connectFirestoreEmulator(firestore, 'localhost', 8080);
+
 // Initialize React Query
 export const queryClient = new QueryClient();
 
 onAuthStateChanged(auth, async (user) => {
+	console.log('Auth CHanged', user);
 	queryClient.setQueryData(['user'], user);
 });
 

@@ -1,8 +1,9 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { signOut, signInWithCustomToken } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 
-import { auth, firestore } from '../../main';
+import { auth, firestore, functions } from '../../main';
 import { userConverter } from './lib/converters';
 
 export const useAuth = () => {
@@ -38,29 +39,29 @@ export const useAuth = () => {
 
 	const { mutateAsync: login } = useMutation({
 		mutationFn: () =>
-			new Promise((res, rej) => {
-				// TODO: Dynamic scopes from the lib
-				(window as any).ipcRenderer.openExternal(
-					'https://authtwitch-xcnznm7gbq-uc.a.run.app?scopes=chat:edit+channel:manage:broadcast+moderator:manage:chat_settings+clips:edit+chat:read+moderator:manage:banned_users',
+			new Promise(async (res, rej) => {
+				const authTwitch = httpsCallable<{ scopes: string }, { url: string }>(
+					functions,
+					'authTwitch',
 				);
+				const { data } = await authTwitch({
+					// TODO: Dynamic scopes from the lib
+					scopes:
+						'chat:edit+channel:manage:broadcast+moderator:manage:chat_settings+clips:edit+chat:read+moderator:manage:banned_users',
+				});
 
-				// TODO: Clean this up
-				(window as any).ipcRenderer.on(
-					'auth',
-					(
-						_e: any,
-						data: {
-							token: string;
-							twitch: {
-								access_token: string;
-								refresh_token: string;
-								scope: string[];
-							};
-						},
-					) => {
-						signInWithCustomToken(auth, data.token).then(res).catch(rej);
-					},
-				);
+				window.ipcRenderer.openExternal(data.url);
+
+				window.ipcRenderer.on<{
+					token: string;
+					twitch: {
+						access_token: string;
+						refresh_token: string;
+						scope: string[];
+					};
+				}>('auth', (_e, data) => {
+					signInWithCustomToken(auth, data.token).then(res).catch(rej);
+				});
 			}),
 	});
 

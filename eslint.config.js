@@ -90,6 +90,7 @@ export default [
 		},
 		plugins: {
 			'@typescript-eslint': tseslint,
+			prettier: prettierPlugin,
 		},
 		settings: {
 			'import/resolver': {
@@ -102,6 +103,7 @@ export default [
 			},
 		},
 		rules: {
+			'prettier/prettier': 'error',
 			// TypeScript
 			'@typescript-eslint/consistent-type-definitions': ['error', 'type'],
 			'@typescript-eslint/explicit-function-return-type': 'off',

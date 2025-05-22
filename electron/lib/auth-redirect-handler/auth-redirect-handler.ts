@@ -1,5 +1,7 @@
 import type { BrowserWindow } from 'electron';
 import { app } from 'electron';
+import { httpsCallable } from 'firebase/functions';
+import { functions } from '../../../src/main';
 
 export const PROTOCOL = 'tabzero';
 
@@ -16,10 +18,16 @@ export const handleProtocolUrl = async (
 
 	if (!code || !scope) return 'no scope or code';
 
-	const repsonse = await fetch(
-		`https://authtwitchcallback-xcnznm7gbq-uc.a.run.app/authTwitchCallback?code=${code}`,
-	);
-	const data = await repsonse.json();
+	const authTwitchCallback = httpsCallable<
+		{ code: string },
+		{
+			token: string;
+			twitch: { access_token: string; refresh_token: string; scope: string[] };
+		}
+	>(functions, 'authTwitchCallback');
+	const { data } = await authTwitchCallback({
+		code,
+	});
 
 	if (!data.token || !data.twitch) {
 		return 'token and twitch not found';
