@@ -10,7 +10,7 @@
 	files: ['dist', 'dist-electron'],
 	mac: {
 		target: ['dmg'],
-		artifactName: '${productName}-Mac-${version}-Install.${ext}',
+		artifactName: '${productName}-mac-install.${ext}',
 	},
 	win: {
 		target: [
@@ -19,7 +19,7 @@
 				arch: ['x64'],
 			},
 		],
-		artifactName: '${productName}-Win-${version}-Install.${ext}',
+		artifactName: '${productName}-win-install.${ext}',
 	},
 	nsis: {
 		oneClick: false,
@@ -29,6 +29,6 @@
 	},
 	linux: {
 		target: ['AppImage'],
-		artifactName: '${productName}-Lin-${version}-Install.${ext}',
+		artifactName: '${productName}-lin-install.${ext}',
 	},
 }

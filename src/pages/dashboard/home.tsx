@@ -18,7 +18,7 @@ const blobToBase64 = (blob: Blob): Promise<string> =>
 
 export default function Page() {
 	const [isRecording, setIsRecording] = useState(false);
-	const [selectedDevice, setSelectedDevice] = useState<MediaStreamTrack | null>(
+	const [selectedDevice, setSelectedDevice] = useState<MediaDeviceInfo | null>(
 		null,
 	);
 
@@ -29,11 +29,8 @@ export default function Page() {
 	const { data } = useQuery({
 		queryKey: ['system', 'devices', 'audio'],
 		queryFn: async () => {
-			const devices = await navigator.mediaDevices.getUserMedia({
-				audio: true,
-			});
-
-			return devices.getAudioTracks();
+			const devices = await navigator.mediaDevices.enumerateDevices();
+			return devices.filter((device) => device.kind === 'audioinput');
 		},
 		initialData: [],
 	});
@@ -47,7 +44,7 @@ export default function Page() {
 		const startRecording = async () => {
 			const stream = await navigator.mediaDevices.getUserMedia({
 				audio: {
-					deviceId: selectedDevice?.id,
+					deviceId: selectedDevice?.deviceId,
 				},
 			});
 
@@ -113,14 +110,14 @@ export default function Page() {
 					className="rounded-xl border p-2"
 					onChange={(e) =>
 						setSelectedDevice(
-							data.find((device) => device.id === e.target.value) ?? null,
+							data.find((device) => device.deviceId === e.target.value) ?? null,
 						)
 					}
 				>
 					{data.map((device) => (
 						<option
-							value={device.id}
-							key={device.id}
+							value={device.deviceId}
+							key={device.deviceId}
 						>
 							{device.label}
 						</option>
