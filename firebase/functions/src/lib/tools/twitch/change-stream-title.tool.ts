@@ -14,25 +14,19 @@ export const twitchStreamChangeTitle = {
     description: 'Change the name of the stream title',
     parameters: toolSchema,
     scopes: ['twitch@channel:manage:broadcast'],
-    function: async (data) => {
-        const token = (data as any).token;
-
-        if (!token) throw new HttpsError('invalid-argument', 'Missing token');
-
-        console.log('Changing stream title to:', data.title);
-
-        const provider = new StaticAuthProvider(CONFIG.twitch.client_id, token);
+    function: async ({ title, user }) => {
+        const provider = new StaticAuthProvider(CONFIG.twitch.client_id, user.providers[user.provider].access_token);
         const api = new ApiClient({ authProvider: provider });
-
+        
         const { userId } = await api.getTokenInfo();
         
         if (!userId) throw new HttpsError('invalid-argument', 'User validation failed');
 
         try {
             await api.channels.updateChannelInfo(userId, {
-                title: data.title,
+                title: title,
             })
-            return { success: true, message: `Title changed to: ${data.title}` }
+            return { success: true, message: `Title changed to: ${title}` }
         } catch (error) {
             console.error(error);
             throw new HttpsError('internal', 'Failed to change stream title');

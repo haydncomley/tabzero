@@ -1,5 +1,4 @@
-
-import { HttpsError, onCall } from 'firebase-functions/v2/https';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { FieldValue } from 'firebase-admin/firestore';
 import { auth, CONFIG, firestore } from '../config';
 import { TOOLS } from './tools';
@@ -20,7 +19,11 @@ export const authTwitch = onCall(() => {
 
 export const authTwitchCallback = onCall(async (request) => {
 	try {
-		const { code } = request.data;
+		const { code } = request.data as { code: string };
+
+		if (!code) {
+			throw new HttpsError('invalid-argument', 'Missing code parameter');
+		}
 
 		const url = [
 			'https://id.twitch.tv/oauth2/token',
@@ -60,7 +63,8 @@ export const authTwitchCallback = onCall(async (request) => {
 						display_name: user.display_name,
 						profile_image_url: user.profile_image_url,
 						offline_image_url: user.offline_image_url,
-						created_at: user.created_at
+						created_at: user.created_at,
+						access_token: access_token,
 					},
 				},
 				provider: 'twitch',
@@ -82,6 +86,6 @@ export const authTwitchCallback = onCall(async (request) => {
 		};
 	} catch (err) {
 		console.error(err);
-		throw new HttpsError('internal', 'Authentication Error');
+		throw new HttpsError('internal', 'Error Authentication', err);
 	}
 });

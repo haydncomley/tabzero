@@ -49,13 +49,19 @@ export const useAuth = () => {
 				window.ipcRenderer.openExternal(data.url);
 
 				window.ipcRenderer.on<{
-					token: string;
-					twitch: {
-						access_token: string;
-						refresh_token: string;
-						scope: string[];
-					};
-				}>('auth', (_e, data) => {
+					code: string;
+					scope: string;
+				}>('auth', async (_e, { code }) => {
+					const authTwitchCallback = httpsCallable<
+						{ code: string },
+						{ token: string; twitch: any }
+					>(functions, 'authTwitchCallback');
+					const { data } = await authTwitchCallback({ code });
+
+					if (!data.token || !data.twitch) {
+						return 'token and twitch not found';
+					}
+
 					signInWithCustomToken(auth, data.token).then(res).catch(rej);
 				});
 			}),

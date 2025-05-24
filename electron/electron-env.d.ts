@@ -20,6 +20,7 @@ declare namespace NodeJS {
 		VITE_PUBLIC: string;
 		VITE_DEV_SERVER_URL: string;
 		NODE_ENV: string;
+		EMULATE?: string;
 	};
 }
 

@@ -28,17 +28,6 @@ export const aiChat = onCall(async (request) => {
 
 const getToolSchema = (schema: z.ZodSchema) => zodToJsonSchema(schema);
 
-// const getToolSchema = (schema: z.ZodSchema) => zodToJsonSchema(schema, {
-//     override: (ctx) => {
-//         if(ctx.jsonSchema.type === 'object') {
-//             ctx.jsonSchema.additionalProperties = false;
-//         }
-//         if(!ctx.jsonSchema.type) {
-//             ctx.jsonSchema.type = 'string';
-//         }
-//     }
-// });
-
 export const aiTranscribe = onCall(async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'User must be authenticated');
 

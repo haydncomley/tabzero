@@ -2,10 +2,8 @@ import { useMutation } from '@tanstack/react-query';
 import { httpsCallable } from 'firebase/functions';
 
 import { functions } from '../../main';
-import { useAuth } from '../use-auth';
 
 export const useToolResolver = () => {
-	const { userDetails } = useAuth();
 	const {
 		mutateAsync: resolveTools,
 		data: resolvedTools,
@@ -30,9 +28,6 @@ export const useToolResolver = () => {
 			const { data } = await aiToolResolver({
 				prompt: options.transcription,
 			});
-
-			console.log('Tools Wanted', data.tools);
-
 			return data.tools;
 		},
 	});
@@ -49,10 +44,8 @@ export const useToolResolver = () => {
 				};
 			}[];
 		}) => {
-			console.log(userDetails);
 			const toolRunner = httpsCallable<
 				{
-					token: string;
 					tools: {
 						id: string;
 						type: 'function';
@@ -62,15 +55,21 @@ export const useToolResolver = () => {
 						};
 					}[];
 				},
-				any
+				{
+					id: string;
+					result:
+						| {
+								success: boolean;
+								message: string;
+								// eslint-disable-next-line no-mixed-spaces-and-tabs
+						  }
+						| undefined;
+				}[]
 			>(functions, 'tool');
 
 			const { data } = await toolRunner({
 				tools: options.tools,
-				token: userDetails?.providers[userDetails.provider].access_token!,
 			});
-
-			console.log('Tools Ran', data);
 
 			return data;
 		},

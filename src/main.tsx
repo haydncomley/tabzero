@@ -1,16 +1,21 @@
 import './global.css';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-// import { getAnalytics } from 'firebase/analytics';
+import { getAnalytics } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getFunctions } from 'firebase/functions';
+import {
+	connectAuthEmulator,
+	getAuth,
+	onAuthStateChanged,
+} from 'firebase/auth';
+import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
+import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { HashRouter } from 'react-router-dom';
 
 import App from './App.tsx';
+import { USE_EMULATOR } from './config.ts';
 
 // Import the functions you need from the SDKs you need
 // TODO: Add SDKs for Firebase products that you want to use
@@ -30,10 +35,16 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-// export const analytics = getAnalytics(app);
+export const analytics = getAnalytics(app);
 export const auth = getAuth(app);
 export const functions = getFunctions(app);
 export const firestore = getFirestore(app);
+
+if (USE_EMULATOR) {
+	connectAuthEmulator(auth, 'http://localhost:9099');
+	connectFunctionsEmulator(functions, 'localhost', 5001);
+	connectFirestoreEmulator(firestore, 'localhost', 8080);
+}
 
 export const queryClient = new QueryClient();
 
