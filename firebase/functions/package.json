@@ -19,6 +19,7 @@
 		"@twurple/auth": "7.3.0",
 		"firebase-admin": "^12.6.0",
 		"firebase-functions": "^6.0.1",
+		"fs-extra": "11.3.0",
 		"openai": "4.100.0",
 		"zod": "3.25.28",
 		"zod-to-json-schema": "3.24.5"
