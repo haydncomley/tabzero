@@ -11,6 +11,7 @@ export type tabzeroUser = {
 			profile_image_url: string;
 			offline_image_url: string;
 			create_at: string;
+			access_token: string;
 		};
 	};
 };

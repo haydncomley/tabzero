@@ -2,13 +2,10 @@
 import { HttpsError, onCall } from 'firebase-functions/v2/https';
 import { FieldValue } from 'firebase-admin/firestore';
 import { auth, CONFIG, firestore } from '../config';
+import { TOOLS } from './tools';
 
-export const authTwitch = onCall((request) => {
-	const { scopes } = request.data;
-
-	if (!scopes) {
-		throw new HttpsError('invalid-argument', 'Missing scopes');
-	}
+export const authTwitch = onCall(() => {
+	const scopes = TOOLS.map((tool) => tool.scopes).flat().filter((scope) => scope.startsWith('twitch')).map((scope) => scope.replace('twitch@', '')).join(' ');
 
 	const url = [
 		'https://id.twitch.tv/oauth2/authorize',
@@ -63,7 +60,7 @@ export const authTwitchCallback = onCall(async (request) => {
 						display_name: user.display_name,
 						profile_image_url: user.profile_image_url,
 						offline_image_url: user.offline_image_url,
-						created_at: user.created_at,
+						created_at: user.created_at
 					},
 				},
 				provider: 'twitch',

@@ -40,15 +40,11 @@ export const useAuth = () => {
 	const { mutateAsync: login } = useMutation({
 		mutationFn: () =>
 			new Promise(async (res, rej) => {
-				const authTwitch = httpsCallable<{ scopes: string }, { url: string }>(
+				const authTwitch = httpsCallable<void, { url: string }>(
 					functions,
 					'authTwitch',
 				);
-				const { data } = await authTwitch({
-					// TODO: Dynamic scopes from the lib
-					scopes:
-						'chat:edit+channel:manage:broadcast+moderator:manage:chat_settings+clips:edit+chat:read+moderator:manage:banned_users',
-				});
+				const { data } = await authTwitch();
 
 				window.ipcRenderer.openExternal(data.url);
 

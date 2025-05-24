@@ -7,7 +7,7 @@ import { version } from '../../../package.json';
 export const Navbar = () => {
 	const { details, logout } = useAuth();
 
-	console.log('Hello', details);
+	console.log(details);
 
 	return (
 		<nav className="flex w-full items-center justify-between border-b p-2">

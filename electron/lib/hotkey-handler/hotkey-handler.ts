@@ -1,37 +1,38 @@
-import type { BrowserWindow} from "electron";
-import { globalShortcut, ipcMain } from "electron"
+import type { BrowserWindow } from 'electron';
+import { globalShortcut, ipcMain } from 'electron';
 
 const isValidAccelerator = (accelerator: string): boolean => {
-    try {
-      globalShortcut.register(accelerator, () => {});
-      globalShortcut.unregister(accelerator);
-      return true;
-    } catch {
-      return false;
-    }
-  }
+	try {
+		globalShortcut.register(accelerator, () => {});
+		globalShortcut.unregister(accelerator);
+		return true;
+	} catch {
+		return false;
+	}
+};
 
 export const initHotkeyHandler = (window: BrowserWindow) => {
-    const hotkeys: Record<string, string> = {};
+	const hotkeys: Record<string, string> = {};
 
-    ipcMain.handle('register-hotkey', (_e, options: { name: string, keys: string }) => {
-        console.log('New Hotkey')
+	ipcMain.handle(
+		'register-hotkey',
+		(_e, options: { name: string; keys: string }) => {
+			if (!isValidAccelerator(options.keys)) {
+				// TODO: Handle invalid bindings
+				console.error(`[Hotkey] Invalid accelerator: ${options.keys}`);
+				return false;
+			}
 
-        if (!isValidAccelerator(options.keys)) {
-            // TODO: Handle invalid bindings
-            console.error(`[Hotkey] Invalid accelerator: ${options.keys}`);
-            return false;
-        }
+			const previous = hotkeys[options.name];
+			if (previous) globalShortcut.unregister(previous);
 
-        const previous = hotkeys[options.name];
-        if (previous) globalShortcut.unregister(previous);
+			hotkeys[options.name] = options.keys;
+			globalShortcut.register(options.keys, () => {
+				console.log(`[Hotkey] ${options.name}`);
+				window.webContents.send('hotkey', options.name);
+			});
 
-        hotkeys[options.name] = options.keys;
-        globalShortcut.register(options.keys, () => {
-            console.log(`[Hotkey] ${options.name}`)
-            window.webContents.send('hotkey', options.name);
-        })
-
-        return true;
-      });
-}
+			return true;
+		},
+	);
+};

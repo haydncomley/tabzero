@@ -6,7 +6,7 @@ const HOTKEY_REBINDS: Record<string, string> = {};
 
 export const useHotkey = (
 	name: keyof typeof HOTKEYS,
-	callback: () => void,
+	callback?: () => void,
 	deps?: React.DependencyList,
 ) => {
 	const mounted = useRef(false);
@@ -14,7 +14,6 @@ export const useHotkey = (
 	const [rebindSuccess, setRebindSuccess] = useState(true);
 
 	useEffect(() => {
-		console.log('useEffect', name, keys);
 		if (!mounted.current) {
 			mounted.current = true;
 			return;
@@ -28,10 +27,10 @@ export const useHotkey = (
 			});
 		}
 
-		(window as any).ipcRenderer.on('hotkey', callback);
+		if (callback) window.ipcRenderer.on('hotkey', callback);
 
 		return () => {
-			(window as any).ipcRenderer.off('hotkey', callback);
+			if (callback) window.ipcRenderer.off('hotkey', callback);
 		};
 	}, [name, keys, ...(deps ?? [])]);
 
@@ -43,8 +42,6 @@ export const useHotkey = (
 				keys,
 			},
 		);
-
-		console.log('remap', success);
 
 		if (!success) {
 			setRebindSuccess(false);

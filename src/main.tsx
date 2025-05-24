@@ -1,15 +1,11 @@
 import './global.css';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { getAnalytics } from 'firebase/analytics';
+// import { getAnalytics } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
-import {
-	connectAuthEmulator,
-	getAuth,
-	onAuthStateChanged,
-} from 'firebase/auth';
-import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
-import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getFunctions } from 'firebase/functions';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { HashRouter } from 'react-router-dom';
@@ -34,20 +30,14 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export const analytics = getAnalytics(app);
+// export const analytics = getAnalytics(app);
 export const auth = getAuth(app);
 export const functions = getFunctions(app);
 export const firestore = getFirestore(app);
 
-connectAuthEmulator(auth, 'http://localhost:9099');
-connectFunctionsEmulator(functions, 'localhost', 5001);
-connectFirestoreEmulator(firestore, 'localhost', 8080);
-
-// Initialize React Query
 export const queryClient = new QueryClient();
 
 onAuthStateChanged(auth, async (user) => {
-	console.log('Auth CHanged', user);
 	queryClient.setQueryData(['user'], user);
 });
 
@@ -62,9 +52,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 );
 
 // Use contextBridge
-(window as any).ipcRenderer.on(
-	'main-process-message',
-	(_event: any, message: any) => {
-		console.log(_event, message);
-	},
-);
+// (window as any).ipcRenderer.on(
+// 	'main-process-message',
+// 	(_event: any, message: any) => {
+// 		console.log(_event, message);
+// 	},
+// );

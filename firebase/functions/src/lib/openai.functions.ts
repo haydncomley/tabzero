@@ -5,6 +5,9 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { getOpenAI } from '../vendor/openai.vendor';
 import { ChatCompletionMessageToolCall } from 'openai/resources/index.mjs';
+import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+import { TOOLS } from './tools';
 
 export const aiChat = onCall(async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'User must be authenticated');
@@ -23,6 +26,19 @@ export const aiChat = onCall(async (request) => {
     };
 });
 
+const getToolSchema = (schema: z.ZodSchema) => zodToJsonSchema(schema);
+
+// const getToolSchema = (schema: z.ZodSchema) => zodToJsonSchema(schema, {
+//     override: (ctx) => {
+//         if(ctx.jsonSchema.type === 'object') {
+//             ctx.jsonSchema.additionalProperties = false;
+//         }
+//         if(!ctx.jsonSchema.type) {
+//             ctx.jsonSchema.type = 'string';
+//         }
+//     }
+// });
+
 export const aiTranscribe = onCall(async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'User must be authenticated');
 
@@ -37,7 +53,8 @@ export const aiTranscribe = onCall(async (request) => {
         await writeFile(tempPath, audioBuffer);
         const response = await openai.audio.transcriptions.create({
             model: 'whisper-1',
-            file: createReadStream(tempPath), 
+            file: createReadStream(tempPath),
+            language: 'en'
         });
 
         return { text: response.text };
@@ -46,6 +63,33 @@ export const aiTranscribe = onCall(async (request) => {
     } finally {
         await remove(tempPath).catch(() => {});
     }
+});
+
+export const aiSpeak = onCall(async (request) => {
+    if (!request.auth) throw new HttpsError('unauthenticated', 'User must be authenticated');
+
+    const { text } = request.data;
+    if (!text) throw new HttpsError('invalid-argument', 'Missing text');
+
+    const openai = getOpenAI();
+
+    const mp3 = await openai.audio.speech.create({
+        model: 'gpt-4o-mini-tts',
+        voice: 'ballad',
+        input: text,
+        instructions: `Voice: Cringe, slightly warn out of breath, and a bit of a stutter - imagine you\'ve been playing video games for hours.
+        Tone: Slightly exited and exaggerated, throw in some sarcasm.
+        Dialect: American/British - somewhere in-between.
+        Features: GenZ slang is a must, gaming terms are also appreciated - dry humour is encouraged. I want you to sound a bit like a young football commentator.
+        `
+    });
+
+    const buffer = Buffer.from(await mp3.arrayBuffer());
+   
+    return {
+      base64: buffer.toString('base64'),
+      contentType: 'audio/mp3'
+    };
 });
 
 export const aiToolResolver = onCall(async (request) => {
@@ -74,26 +118,15 @@ export const aiToolResolver = onCall(async (request) => {
                     }
                 ]).flat(),
             ],
-            // TODO: Add tools
-            tools: [
-                {
-                    type: 'function',
-                    function: {
-                        name: 'twitchEditChatSettings',
-                        description: 'Edit settings within the twitch chat - emote only, slow mode and more.',
-                        parameters: {
-                            type: 'object',
-                            properties: {
-                                emoteOnly: { type: 'boolean' },
-                                slowMode: { type: 'boolean' },
-                            },
-                            required: ['emoteOnly', 'slowMode'],
-                            additionalProperties: false,
-                        },
-                        strict: true,
-                    }
+            tools: TOOLS.map((tool) => ({
+                type: 'function',
+                function: {
+                    name: tool.name,
+                    description: tool.description,
+                    parameters: getToolSchema(tool.parameters),
+                    strict: true,
                 }
-            ]
+            })),
         });
 
         return response.choices.map((choice) => choice.message.tool_calls ?? []).flat();
