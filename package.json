@@ -11,7 +11,7 @@
 	},
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc && vite build && electron-builder",
+		"build": "tsc && vite build",
 		"lint": "eslint . --report-unused-disable-directives --max-warnings 0",
 		"preview": "vite preview",
 		"format": "prettier --write ./src",
