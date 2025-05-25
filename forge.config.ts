@@ -18,6 +18,7 @@ export default {
 					owner: 'haydncomley',
 					name: 'tabzero',
 				},
+				draft: true,
 			},
 		},
 	],
