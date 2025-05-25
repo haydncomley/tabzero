@@ -11,9 +11,11 @@ import {
 } from './lib/auth-redirect-handler';
 import { initHotkeyHandler } from './lib/hotkey-handler';
 
-// @ts-expect-error - createRequire is not supported in Node.js 20
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+app.setAppUserModelId('com.haydncom.tabzero');
+if (require('electron-squirrel-startup')) app.quit();
 
 // The built directory structure
 //
@@ -41,7 +43,7 @@ updateElectronApp();
 
 function createWindow() {
 	win = new BrowserWindow({
-		icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
+		icon: path.join(process.env.VITE_PUBLIC, 'icon.png'),
 		webPreferences: {
 			preload: path.join(__dirname, 'preload.mjs'),
 			devTools: true,

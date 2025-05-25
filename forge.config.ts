@@ -7,9 +7,21 @@ import { MakerZIP } from '@electron-forge/maker-zip';
 export default {
 	packagerConfig: {
 		asar: true,
+		icon: 'public/icon',
 	},
 	rebuildConfig: {},
-	makers: [new MakerSquirrel({}, ['win32']), new MakerZIP({}, ['darwin'])],
+	makers: [
+		new MakerSquirrel(
+			{
+				setupIcon: 'public/icon.ico',
+				noMsi: true,
+				setupExe: 'tabzero.exe',
+				setupMsi: 'tabzero-install.msi',
+			},
+			['win32'],
+		),
+		new MakerZIP({}, ['darwin']),
+	],
 	publishers: [
 		{
 			name: '@electron-forge/publisher-github',
