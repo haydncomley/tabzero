@@ -20,15 +20,15 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 22
+          node-version: 22 # Or your project's Node.js version
 
       - name: Install dependencies
-        run: yarn install
+        run: npm install
 
       - name: Make and Publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: yarn app:publish
+        run: npm run app:publish
 
 permissions:
   contents: write
