@@ -297,7 +297,8 @@ function B() {
     icon: h.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
       preload: h.join(N, "preload.mjs"),
-      devTools: !0
+      devTools: !0,
+      webSecurity: !1
     },
     autoHideMenuBar: !0
   }), i.webContents.on("did-finish-load", () => {
