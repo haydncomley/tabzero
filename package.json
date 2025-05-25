@@ -3,7 +3,7 @@
 	"author": "Haydn Comley",
 	"description": "AI Stream Assistant - Never tab out again.",
 	"private": true,
-	"version": "0.0.1",
+	"version": "0.0.11",
 	"type": "module",
 	"repository": {
 		"type": "git",
