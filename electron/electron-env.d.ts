@@ -21,6 +21,7 @@ declare namespace NodeJS {
 		VITE_DEV_SERVER_URL: string;
 		NODE_ENV: string;
 		EMULATE?: string;
+		RELEASE_TAG?: string;
 	};
 }
 

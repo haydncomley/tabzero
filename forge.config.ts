@@ -6,6 +6,9 @@ import { MakerZIP } from '@electron-forge/maker-zip';
 
 export default {
 	packagerConfig: {
+		name: 'tabzero',
+		appVersion: process.env.RELEASE_TAG ?? '0.0.0',
+		buildVersion: process.env.RELEASE_TAG ?? '0.0.0',
 		asar: true,
 	},
 	rebuildConfig: {},
