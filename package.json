@@ -1,7 +1,7 @@
 {
 	"name": "tabzero",
 	"author": "Haydn Comley",
-	"description": "AI Stream Assistant - Never tab out again.",
+	"description": "AI Stream Assistant - Never tab out again",
 	"private": true,
 	"version": "0.0.13",
 	"type": "module",

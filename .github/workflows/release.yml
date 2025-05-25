@@ -40,7 +40,7 @@ jobs:
       - name: 🌍 Make & Publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: DEBUG=electron-forge* yarn app:publish
+        run: yarn app:publish
 
 permissions:
   contents: write
