@@ -3,9 +3,10 @@ import { LogOut } from 'lucide-react';
 import { useAuth } from '~/hooks/use-auth';
 
 import { version } from '../../../package.json';
+import { Button } from '../button';
 
 export const Navbar = () => {
-	const { details, logout } = useAuth();
+	const { details, logout, subscribe } = useAuth();
 
 	return (
 		<nav className="flex w-full items-center justify-between border-b p-2">
@@ -14,7 +15,10 @@ export const Navbar = () => {
 				<p className="-mt-1 text-xs opacity-50">v{version}a</p>
 			</div>
 
-			<div>
+			<div className="flex items-center gap-2">
+				<Button onClick={() => subscribe()}>
+					Subscribe: {details?.isSubscribed ? 'Active' : 'Inactive'}
+				</Button>
 				<button
 					title="Logout"
 					onClick={() => logout()}

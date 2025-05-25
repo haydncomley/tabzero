@@ -2,3 +2,4 @@
 export * from './lib/auth.functions';
 export * from './lib/openai.functions';
 export * from './lib/tool.functions';
+export * from './lib/payment.functions';

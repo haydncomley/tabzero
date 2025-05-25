@@ -1,81 +1,121 @@
-import { ipcMain as f, shell as v, app as s, globalShortcut as a, BrowserWindow as m } from "electron";
-import { createRequire as P } from "node:module";
-import { fileURLToPath as g } from "node:url";
-import i from "node:path";
-const w = () => {
-  f.handle("open-external", (r, t) => v.openExternal(t));
-}, d = "tabzero", p = async (r, t) => {
-  const o = new URL(t);
-  if (!o.protocol.startsWith(d)) return "not a valid url";
-  const n = new URLSearchParams(o.search), c = n.get("code"), u = n.get("scope");
-  if (!c || !u) return "no scope or code";
-  r.webContents.send("auth", { code: c, scope: u });
-}, y = (r) => {
-  s.setAsDefaultProtocolClient(d), s.on("open-url", async (t, o) => {
-    p(r, o);
+import { ipcMain, shell, app, globalShortcut, BrowserWindow } from "electron";
+import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+const initLinkHandler = () => {
+  ipcMain.handle("open-external", (_e, url) => {
+    return shell.openExternal(url);
   });
-}, E = (r) => {
+};
+const PROTOCOL = "tabzero";
+const handleProtocolUrl = async (window, rawUrl) => {
+  const url = new URL(rawUrl);
+  if (!url.protocol.startsWith(PROTOCOL)) return "not a valid url";
+  const searchParams = new URLSearchParams(url.search);
+  const code = searchParams.get("code");
+  const scope = searchParams.get("scope");
+  if (!code || !scope) return "no scope or code";
+  window.webContents.send("auth", { code, scope });
+};
+const initAuthRedirectHandler = (window) => {
+  app.setAsDefaultProtocolClient(PROTOCOL);
+  app.on("open-url", async (_event, rawUrl) => {
+    handleProtocolUrl(window, rawUrl);
+  });
+};
+const isValidAccelerator = (accelerator) => {
   try {
-    return a.register(r, () => {
-    }), a.unregister(r), !0;
+    globalShortcut.register(accelerator, () => {
+    });
+    globalShortcut.unregister(accelerator);
+    return true;
   } catch {
-    return !1;
+    return false;
   }
-}, T = (r) => {
-  const t = {};
-  f.handle(
+};
+const initHotkeyHandler = (window) => {
+  const hotkeys = {};
+  ipcMain.handle(
     "register-hotkey",
-    (o, n) => {
-      if (!E(n.keys))
-        return console.error(`[Hotkey] Invalid accelerator: ${n.keys}`), !1;
-      const c = t[n.name];
-      return c && a.unregister(c), t[n.name] = n.keys, a.register(n.keys, () => {
-        console.log(`[Hotkey] ${n.name}`), r.webContents.send("hotkey", n.name);
-      }), !0;
+    (_e, options) => {
+      if (!isValidAccelerator(options.keys)) {
+        console.error(`[Hotkey] Invalid accelerator: ${options.keys}`);
+        return false;
+      }
+      const previous = hotkeys[options.name];
+      if (previous) globalShortcut.unregister(previous);
+      hotkeys[options.name] = options.keys;
+      globalShortcut.register(options.keys, () => {
+        console.log(`[Hotkey] ${options.name}`);
+        window.webContents.send("hotkey", options.name);
+      });
+      return true;
     }
   );
 };
-P(import.meta.url);
-const h = i.dirname(g(import.meta.url));
-process.env.APP_ROOT = i.join(h, "..");
-const l = process.env.VITE_DEV_SERVER_URL, A = i.join(process.env.APP_ROOT, "dist-electron"), R = i.join(process.env.APP_ROOT, "dist");
-process.env.VITE_PUBLIC = l ? i.join(process.env.APP_ROOT, "public") : R;
-let e;
-function _() {
-  e = new m({
-    icon: i.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+createRequire(import.meta.url);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+process.env.APP_ROOT = path.join(__dirname, "..");
+const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
+const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
+const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
+process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
+let win;
+function createWindow() {
+  win = new BrowserWindow({
+    icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
-      preload: i.join(h, "preload.mjs"),
-      devTools: !0
+      preload: path.join(__dirname, "preload.mjs"),
+      devTools: true
     },
-    autoHideMenuBar: !0
-  }), e.webContents.on("did-finish-load", () => {
-    e == null || e.webContents.send("main-process-message", { hello: "world" });
-  }), l ? e.loadURL(l) : e.loadFile(i.join(R, "index.html")), y(e), T(e);
+    autoHideMenuBar: true
+  });
+  win.webContents.on("did-finish-load", () => {
+    win == null ? void 0 : win.webContents.send("main-process-message", { hello: "world" });
+  });
+  if (VITE_DEV_SERVER_URL) {
+    win.loadURL(VITE_DEV_SERVER_URL);
+  } else {
+    win.loadFile(path.join(RENDERER_DIST, "index.html"));
+  }
+  initAuthRedirectHandler(win);
+  initHotkeyHandler(win);
 }
-s.on("window-all-closed", () => {
-  process.platform !== "darwin" && (s.quit(), e = null);
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+    win = null;
+  }
 });
-s.on("activate", () => {
-  m.getAllWindows().length === 0 && _();
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
 });
-w();
-if (!s.requestSingleInstanceLock())
-  s.quit();
-else {
-  const r = async (t) => {
-    if (!e) return;
-    const o = t.find((n) => n.startsWith(`${d}://`));
-    o && p(e, o);
+initLinkHandler();
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  const handleArgs = async (argv) => {
+    if (!win) return;
+    const url = argv.find((arg) => arg.startsWith(`${PROTOCOL}://`));
+    if (!url) return;
+    handleProtocolUrl(win, url);
   };
-  s.on("second-instance", (t, o) => {
-    r(o), e && (e.isMinimized() && e.restore(), e.focus());
-  }), s.whenReady().then(() => {
-    _(), r(process.argv);
+  app.on("second-instance", (_event, argv) => {
+    handleArgs(argv);
+    if (win) {
+      if (win.isMinimized()) win.restore();
+      win.focus();
+    }
+  });
+  app.whenReady().then(() => {
+    createWindow();
+    handleArgs(process.argv);
   });
 }
 export {
-  A as MAIN_DIST,
-  R as RENDERER_DIST,
-  l as VITE_DEV_SERVER_URL
+  MAIN_DIST,
+  RENDERER_DIST,
+  VITE_DEV_SERVER_URL
 };

@@ -73,6 +73,18 @@ export const useAuth = () => {
 		},
 	});
 
+	const { mutateAsync: subscribe } = useMutation({
+		mutationFn: async () => {
+			const stripeSubscribe = httpsCallable<
+				void,
+				{ sessionId: string; sessionUrl: string }
+			>(functions, 'stripeCheckout');
+			const { data } = await stripeSubscribe();
+			window.ipcRenderer.openExternal(data.sessionUrl);
+			return data;
+		},
+	});
+
 	return {
 		login,
 		logout,
@@ -88,7 +100,9 @@ export const useAuth = () => {
 						userDetails.providers[userDetails.provider].display_name,
 					profile_image:
 						userDetails.providers[userDetails.provider].profile_image_url,
+					isSubscribed: userDetails.stripe_subscription_status ?? false,
 				}
 			: null,
+		subscribe,
 	};
 };

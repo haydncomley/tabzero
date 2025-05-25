@@ -4,13 +4,12 @@ import { httpsCallable } from 'firebase/functions';
 import { functions } from '../../main';
 import { blobToBase64 } from './lib/blob-to-base64';
 
-export const useTranscriber = ({ id }: { id: string | null }) => {
+export const useTranscriber = () => {
 	const {
 		mutateAsync: transcribe,
 		data: transcription,
 		isPending: isTranscribing,
 	} = useMutation({
-		mutationKey: ['transcribe', id],
 		mutationFn: async (options: { audio: Blob; deviceId?: string }) => {
 			const aiTranscribe = httpsCallable<{ audio: string }, { text: string }>(
 				functions,

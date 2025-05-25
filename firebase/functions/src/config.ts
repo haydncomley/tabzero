@@ -22,5 +22,14 @@ export const CONFIG = {
 	},
 	openai: {
 		key: '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',
+	},
+	stripe: {
+		key: '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',
+		webhook_secret: 'whsec_FPgEZvwwAP4zlozuuznXSY4GoJewNpjG',
+		tiers: {
+			base: {
+				price_id: 'price_1RSgzIRdSyIS0KuupZLFVqMV',
+			},
+		}
 	}
 };

@@ -2,8 +2,10 @@ import { useMutation } from '@tanstack/react-query';
 import { httpsCallable } from 'firebase/functions';
 
 import { functions } from '../../main';
+import { useAudioPlayer } from '../use-audio-player';
 
 export const useToolResolver = () => {
+	const { speak } = useAudioPlayer();
 	const {
 		mutateAsync: resolveTools,
 		data: resolvedTools,
@@ -61,6 +63,7 @@ export const useToolResolver = () => {
 						| {
 								success: boolean;
 								message: string;
+								tts?: string;
 								// eslint-disable-next-line no-mixed-spaces-and-tabs
 						  }
 						| undefined;
@@ -69,6 +72,10 @@ export const useToolResolver = () => {
 
 			const { data } = await toolRunner({
 				tools: options.tools,
+			});
+
+			data.forEach((tool) => {
+				if (tool.result?.tts) speak({ text: tool.result.tts });
 			});
 
 			return data;

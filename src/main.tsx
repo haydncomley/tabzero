@@ -1,5 +1,6 @@
 import './global.css';
 
+import { loadStripe } from '@stripe/stripe-js';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { getAnalytics } from 'firebase/analytics';
 import { initializeApp } from 'firebase/app';
@@ -39,6 +40,9 @@ export const analytics = getAnalytics(app);
 export const auth = getAuth(app);
 export const functions = getFunctions(app);
 export const firestore = getFirestore(app);
+export const stripe = await loadStripe(
+	'pk_live_51LF1WaRdSyIS0KuuLAUlIdpbAHEGTbGMVjIhDUz5fwfoGTvUWAkTH4OLi4Ae85TsVaqEjjFYtJaPKYUaLFmOEjWz00vg1Nng8l',
+);
 
 if (USE_EMULATOR) {
 	connectAuthEmulator(auth, 'http://localhost:9099');

@@ -14,4 +14,7 @@ export type tabzeroUser = {
 			access_token: string;
 		};
 	};
+	stripe_customer_id?: string;
+	stripe_subscription_id?: string;
+	stripe_subscription_status?: boolean;
 };

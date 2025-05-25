@@ -26,7 +26,7 @@ export const twitchStreamChangeTitle = {
             await api.channels.updateChannelInfo(userId, {
                 title: title,
             })
-            return { success: true, message: `Title changed to: ${title}` }
+            return { success: true, message: `Title changed to: ${title}`, tts: `You title was set to: ${title}` }
         } catch (error) {
             console.error(error);
             throw new HttpsError('internal', 'Failed to change stream title');

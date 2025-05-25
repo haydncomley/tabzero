@@ -33,11 +33,12 @@ export const authTwitchCallback = onCall(async (request) => {
 			'&grant_type=authorization_code',
 			`&redirect_uri=${CONFIG.twitch.redirect_uri}`,
 		].join('');
+		
 
 		const tokenResp = await fetch(url, {
 			method: 'POST',
 		});
-		const { access_token, refresh_token, scope } = await tokenResp.json();
+		const { access_token, refresh_token, scope, expires_in } = await tokenResp.json();
 
 		const userResp = await fetch('https://api.twitch.tv/helix/users', {
 			headers: {
@@ -64,7 +65,9 @@ export const authTwitchCallback = onCall(async (request) => {
 						profile_image_url: user.profile_image_url,
 						offline_image_url: user.offline_image_url,
 						created_at: user.created_at,
+						expires_in: Date.now() + ((expires_in - 60) * 1000),
 						access_token: access_token,
+						refresh_token: refresh_token,
 					},
 				},
 				provider: 'twitch',

@@ -4,9 +4,17 @@ import { useCallback } from 'react';
 
 import { functions } from '../../main';
 
+let TRANSCRIPTIONS: Record<string, string> = {};
+
 export const useAudioPlayer = () => {
 	const { mutateAsync: speak, isPending: isLoadingSpeech } = useMutation({
 		mutationFn: async (options: { text: string }) => {
+			if (TRANSCRIPTIONS[options.text]) {
+				const audio = new Audio(TRANSCRIPTIONS[options.text]);
+				audio.play();
+				return;
+			}
+
 			const aiSpeak = httpsCallable<
 				{ text: string },
 				{ base64: string; contentType: string }
@@ -16,7 +24,9 @@ export const useAudioPlayer = () => {
 				text: options.text,
 			});
 
-			const audio = new Audio(`data:${data.contentType};base64,${data.base64}`);
+			TRANSCRIPTIONS[options.text] =
+				`data:${data.contentType};base64,${data.base64}`;
+			const audio = new Audio(TRANSCRIPTIONS[options.text]);
 			audio.play();
 		},
 	});

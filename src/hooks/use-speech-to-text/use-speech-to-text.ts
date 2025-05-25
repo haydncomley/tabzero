@@ -10,18 +10,10 @@ export const useSpeechToText = ({
 }: {
 	hotkey: keyof typeof HOTKEYS;
 }) => {
-	const {
-		startRecording,
-		stopRecording,
-		isRecording,
-		audioBlob,
-		audioId,
-		devices,
-	} = useRecorder();
+	const { startRecording, stopRecording, isRecording, audioBlob, devices } =
+		useRecorder();
 
-	const { transcribe, isTranscribing, transcription } = useTranscriber({
-		id: audioId,
-	});
+	const { transcribe, isTranscribing, transcription } = useTranscriber();
 
 	const toggleRecording = useMemo(() => {
 		if (!isRecording) return startRecording;
