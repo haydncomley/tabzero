@@ -1,541 +1,332 @@
-import require$$7, { ipcMain, shell, app, globalShortcut, BrowserWindow } from "electron";
-import require$$2 from "node:assert";
-import require$$3 from "node:fs";
-import require$$4 from "node:os";
-import path from "node:path";
-import require$$6 from "node:util";
-import { createRequire } from "node:module";
-import { fileURLToPath } from "node:url";
-var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
-var dist = {};
-var s = 1e3;
-var m = s * 60;
-var h = m * 60;
-var d = h * 24;
-var w = d * 7;
-var y = d * 365.25;
-var ms = function(val, options) {
-  options = options || {};
-  var type = typeof val;
-  if (type === "string" && val.length > 0) {
-    return parse(val);
-  } else if (type === "number" && isFinite(val)) {
-    return options.long ? fmtLong(val) : fmtShort(val);
-  }
+import V, { ipcMain as O, shell as C, app as f, globalShortcut as k, BrowserWindow as H } from "electron";
+import F from "node:assert";
+import z from "node:fs";
+import W from "node:os";
+import h from "node:path";
+import J from "node:util";
+import { createRequire as G } from "node:module";
+import { fileURLToPath as K } from "node:url";
+var A = typeof globalThis < "u" ? globalThis : typeof window < "u" ? window : typeof global < "u" ? global : typeof self < "u" ? self : {}, U = {}, b = 1e3, _ = b * 60, y = _ * 60, v = y * 24, Q = v * 7, X = v * 365.25, Y = function(t, r) {
+  r = r || {};
+  var e = typeof t;
+  if (e === "string" && t.length > 0)
+    return Z(t);
+  if (e === "number" && isFinite(t))
+    return r.long ? te(t) : ee(t);
   throw new Error(
-    "val is not a non-empty string or a valid number. val=" + JSON.stringify(val)
+    "val is not a non-empty string or a valid number. val=" + JSON.stringify(t)
   );
 };
-function parse(str) {
-  str = String(str);
-  if (str.length > 100) {
-    return;
-  }
-  var match = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
-    str
-  );
-  if (!match) {
-    return;
-  }
-  var n = parseFloat(match[1]);
-  var type = (match[2] || "ms").toLowerCase();
-  switch (type) {
-    case "years":
-    case "year":
-    case "yrs":
-    case "yr":
-    case "y":
-      return n * y;
-    case "weeks":
-    case "week":
-    case "w":
-      return n * w;
-    case "days":
-    case "day":
-    case "d":
-      return n * d;
-    case "hours":
-    case "hour":
-    case "hrs":
-    case "hr":
-    case "h":
-      return n * h;
-    case "minutes":
-    case "minute":
-    case "mins":
-    case "min":
-    case "m":
-      return n * m;
-    case "seconds":
-    case "second":
-    case "secs":
-    case "sec":
-    case "s":
-      return n * s;
-    case "milliseconds":
-    case "millisecond":
-    case "msecs":
-    case "msec":
-    case "ms":
-      return n;
-    default:
-      return void 0;
+function Z(t) {
+  if (t = String(t), !(t.length > 100)) {
+    var r = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
+      t
+    );
+    if (r) {
+      var e = parseFloat(r[1]), o = (r[2] || "ms").toLowerCase();
+      switch (o) {
+        case "years":
+        case "year":
+        case "yrs":
+        case "yr":
+        case "y":
+          return e * X;
+        case "weeks":
+        case "week":
+        case "w":
+          return e * Q;
+        case "days":
+        case "day":
+        case "d":
+          return e * v;
+        case "hours":
+        case "hour":
+        case "hrs":
+        case "hr":
+        case "h":
+          return e * y;
+        case "minutes":
+        case "minute":
+        case "mins":
+        case "min":
+        case "m":
+          return e * _;
+        case "seconds":
+        case "second":
+        case "secs":
+        case "sec":
+        case "s":
+          return e * b;
+        case "milliseconds":
+        case "millisecond":
+        case "msecs":
+        case "msec":
+        case "ms":
+          return e;
+        default:
+          return;
+      }
+    }
   }
 }
-function fmtShort(ms2) {
-  var msAbs = Math.abs(ms2);
-  if (msAbs >= d) {
-    return Math.round(ms2 / d) + "d";
-  }
-  if (msAbs >= h) {
-    return Math.round(ms2 / h) + "h";
-  }
-  if (msAbs >= m) {
-    return Math.round(ms2 / m) + "m";
-  }
-  if (msAbs >= s) {
-    return Math.round(ms2 / s) + "s";
-  }
-  return ms2 + "ms";
+function ee(t) {
+  var r = Math.abs(t);
+  return r >= v ? Math.round(t / v) + "d" : r >= y ? Math.round(t / y) + "h" : r >= _ ? Math.round(t / _) + "m" : r >= b ? Math.round(t / b) + "s" : t + "ms";
 }
-function fmtLong(ms2) {
-  var msAbs = Math.abs(ms2);
-  if (msAbs >= d) {
-    return plural(ms2, msAbs, d, "day");
-  }
-  if (msAbs >= h) {
-    return plural(ms2, msAbs, h, "hour");
-  }
-  if (msAbs >= m) {
-    return plural(ms2, msAbs, m, "minute");
-  }
-  if (msAbs >= s) {
-    return plural(ms2, msAbs, s, "second");
-  }
-  return ms2 + " ms";
+function te(t) {
+  var r = Math.abs(t);
+  return r >= v ? R(t, r, v, "day") : r >= y ? R(t, r, y, "hour") : r >= _ ? R(t, r, _, "minute") : r >= b ? R(t, r, b, "second") : t + " ms";
 }
-function plural(ms2, msAbs, n, name2) {
-  var isPlural = msAbs >= n * 1.5;
-  return Math.round(ms2 / n) + " " + name2 + (isPlural ? "s" : "");
+function R(t, r, e, o) {
+  var a = r >= e * 1.5;
+  return Math.round(t / e) + " " + o + (a ? "s" : "");
 }
-var isUrl_1 = isUrl$1;
-var protocolAndDomainRE = /^(?:\w+:)?\/\/(\S+)$/;
-var localhostDomainRE = /^localhost[\:?\d]*(?:[^\:?\d]\S*)?$/;
-var nonLocalhostDomainRE = /^[^\s\.]+\.\S{2,}$/;
-function isUrl$1(string) {
-  if (typeof string !== "string") {
-    return false;
-  }
-  var match = string.match(protocolAndDomainRE);
-  if (!match) {
-    return false;
-  }
-  var everythingAfterProtocol = match[1];
-  if (!everythingAfterProtocol) {
-    return false;
-  }
-  if (localhostDomainRE.test(everythingAfterProtocol) || nonLocalhostDomainRE.test(everythingAfterProtocol)) {
-    return true;
-  }
-  return false;
+var re = se, oe = /^(?:\w+:)?\/\/(\S+)$/, ae = /^localhost[\:?\d]*(?:[^\:?\d]\S*)?$/, ne = /^[^\s\.]+\.\S{2,}$/;
+function se(t) {
+  if (typeof t != "string")
+    return !1;
+  var r = t.match(oe);
+  if (!r)
+    return !1;
+  var e = r[1];
+  return e ? !!(ae.test(e) || ne.test(e)) : !1;
 }
-var isUrl = isUrl_1;
-var laxUrlRegex = /(?:(?:[^:]+:)?[/][/])?(?:.+@)?([^/]+)([/][^?#]+)/;
-var commonjs = function(repoUrl, opts) {
-  var obj = {};
-  opts = opts || {};
-  if (!repoUrl) {
+var ie = re, ce = /(?:(?:[^:]+:)?[/][/])?(?:.+@)?([^/]+)([/][^?#]+)/, ue = function(t, r) {
+  var e = {};
+  if (r = r || {}, !t || (t.url && (t = t.url), typeof t != "string"))
     return null;
-  }
-  if (repoUrl.url) {
-    repoUrl = repoUrl.url;
-  }
-  if (typeof repoUrl !== "string") {
-    return null;
-  }
-  var shorthand = repoUrl.match(/^([\w-_]+)\/([\w-_\.]+)(?:#([\w-_\.]+))?$/);
-  var mediumhand = repoUrl.match(/^github:([\w-_]+)\/([\w-_\.]+)(?:#([\w-_\.]+))?$/);
-  var antiquated = repoUrl.match(/^git@[\w-_\.]+:([\w-_]+)\/([\w-_\.]+)$/);
-  if (shorthand) {
-    obj.user = shorthand[1];
-    obj.repo = shorthand[2];
-    obj.branch = shorthand[3] || "master";
-    obj.host = "github.com";
-  } else if (mediumhand) {
-    obj.user = mediumhand[1];
-    obj.repo = mediumhand[2];
-    obj.branch = mediumhand[3] || "master";
-    obj.host = "github.com";
-  } else if (antiquated) {
-    obj.user = antiquated[1];
-    obj.repo = antiquated[2].replace(/\.git$/i, "");
-    obj.branch = "master";
-    obj.host = "github.com";
-  } else {
-    repoUrl = repoUrl.replace(/^git\+/, "");
-    if (!isUrl(repoUrl)) {
+  var o = t.match(/^([\w-_]+)\/([\w-_\.]+)(?:#([\w-_\.]+))?$/), a = t.match(/^github:([\w-_]+)\/([\w-_\.]+)(?:#([\w-_\.]+))?$/), c = t.match(/^git@[\w-_\.]+:([\w-_]+)\/([\w-_\.]+)$/);
+  if (o)
+    e.user = o[1], e.repo = o[2], e.branch = o[3] || "master", e.host = "github.com";
+  else if (a)
+    e.user = a[1], e.repo = a[2], e.branch = a[3] || "master", e.host = "github.com";
+  else if (c)
+    e.user = c[1], e.repo = c[2].replace(/\.git$/i, ""), e.branch = "master", e.host = "github.com";
+  else {
+    if (t = t.replace(/^git\+/, ""), !ie(t))
       return null;
-    }
-    var ref = repoUrl.match(laxUrlRegex) || [];
-    var hostname = ref[1];
-    var pathname = ref[2];
-    if (!hostname) {
+    var p = t.match(ce) || [], s = p[1], n = p[2];
+    if (!s || s !== "github.com" && s !== "www.github.com" && !r.enterprise)
       return null;
-    }
-    if (hostname !== "github.com" && hostname !== "www.github.com" && !opts.enterprise) {
+    var u = n.match(/^\/([\w-_]+)\/([\w-_\.]+)(\/tree\/[\%\w-_\.\/]+)?(\/blob\/[\%\w-_\.\/]+)?/);
+    if (!u)
       return null;
-    }
-    var parts = pathname.match(/^\/([\w-_]+)\/([\w-_\.]+)(\/tree\/[\%\w-_\.\/]+)?(\/blob\/[\%\w-_\.\/]+)?/);
-    if (!parts) {
-      return null;
-    }
-    obj.user = parts[1];
-    obj.repo = parts[2].replace(/\.git$/i, "");
-    obj.host = hostname || "github.com";
-    if (parts[3] && /^\/tree\/master\//.test(parts[3])) {
-      obj.branch = "master";
-      obj.path = parts[3].replace(/\/$/, "");
-    } else if (parts[3]) {
-      var branchMatch = parts[3].replace(/^\/tree\//, "").match(/[\%\w-_.]*\/?[\%\w-_]+/);
-      obj.branch = branchMatch && branchMatch[0];
-    } else if (parts[4]) {
-      var branchMatch = parts[4].replace(/^\/blob\//, "").match(/[\%\w-_.]*\/?[\%\w-_]+/);
-      obj.branch = branchMatch && branchMatch[0];
-    } else {
-      obj.branch = "master";
-    }
+    if (e.user = u[1], e.repo = u[2].replace(/\.git$/i, ""), e.host = s || "github.com", u[3] && /^\/tree\/master\//.test(u[3]))
+      e.branch = "master", e.path = u[3].replace(/\/$/, "");
+    else if (u[3]) {
+      var d = u[3].replace(/^\/tree\//, "").match(/[\%\w-_.]*\/?[\%\w-_]+/);
+      e.branch = d && d[0];
+    } else if (u[4]) {
+      var d = u[4].replace(/^\/blob\//, "").match(/[\%\w-_.]*\/?[\%\w-_]+/);
+      e.branch = d && d[0];
+    } else
+      e.branch = "master";
   }
-  if (obj.host === "github.com") {
-    obj.apiHost = "api.github.com";
-  } else {
-    obj.apiHost = obj.host + "/api/v3";
-  }
-  obj.tarball_url = "https://" + obj.apiHost + "/repos/" + obj.user + "/" + obj.repo + "/tarball/" + obj.branch;
-  obj.clone_url = "https://" + obj.host + "/" + obj.user + "/" + obj.repo;
-  if (obj.branch === "master") {
-    obj.https_url = "https://" + obj.host + "/" + obj.user + "/" + obj.repo;
-    obj.travis_url = "https://travis-ci.org/" + obj.user + "/" + obj.repo;
-    obj.zip_url = "https://" + obj.host + "/" + obj.user + "/" + obj.repo + "/archive/master.zip";
-  } else {
-    obj.https_url = "https://" + obj.host + "/" + obj.user + "/" + obj.repo + "/blob/" + obj.branch;
-    obj.travis_url = "https://travis-ci.org/" + obj.user + "/" + obj.repo + "?branch=" + obj.branch;
-    obj.zip_url = "https://" + obj.host + "/" + obj.user + "/" + obj.repo + "/archive/" + obj.branch + ".zip";
-  }
-  if (obj.path) {
-    obj.https_url += obj.path;
-  }
-  obj.api_url = "https://" + obj.apiHost + "/repos/" + obj.user + "/" + obj.repo;
-  return obj;
+  return e.host === "github.com" ? e.apiHost = "api.github.com" : e.apiHost = e.host + "/api/v3", e.tarball_url = "https://" + e.apiHost + "/repos/" + e.user + "/" + e.repo + "/tarball/" + e.branch, e.clone_url = "https://" + e.host + "/" + e.user + "/" + e.repo, e.branch === "master" ? (e.https_url = "https://" + e.host + "/" + e.user + "/" + e.repo, e.travis_url = "https://travis-ci.org/" + e.user + "/" + e.repo, e.zip_url = "https://" + e.host + "/" + e.user + "/" + e.repo + "/archive/master.zip") : (e.https_url = "https://" + e.host + "/" + e.user + "/" + e.repo + "/blob/" + e.branch, e.travis_url = "https://travis-ci.org/" + e.user + "/" + e.repo + "?branch=" + e.branch, e.zip_url = "https://" + e.host + "/" + e.user + "/" + e.repo + "/archive/" + e.branch + ".zip"), e.path && (e.https_url += e.path), e.api_url = "https://" + e.apiHost + "/repos/" + e.user + "/" + e.repo, e;
 };
-const name = "update-electron-app";
-const version = "3.1.1";
-const require$$8 = {
-  name,
-  version
+const le = "update-electron-app", de = "3.1.1", pe = {
+  name: le,
+  version: de
 };
-var __importDefault = commonjsGlobal && commonjsGlobal.__importDefault || function(mod) {
-  return mod && mod.__esModule ? mod : { "default": mod };
+var w = A && A.__importDefault || function(t) {
+  return t && t.__esModule ? t : { default: t };
 };
-Object.defineProperty(dist, "__esModule", { value: true });
-dist.UpdateSourceType = void 0;
-var updateElectronApp_1 = dist.updateElectronApp = updateElectronApp;
-dist.makeUserNotifier = makeUserNotifier;
-const ms_1 = __importDefault(ms);
-const github_url_to_object_1 = __importDefault(commonjs);
-const node_assert_1 = __importDefault(require$$2);
-const node_fs_1 = __importDefault(require$$3);
-const node_os_1 = __importDefault(require$$4);
-const node_path_1 = __importDefault(path);
-const node_util_1 = require$$6;
-const electron_1 = require$$7;
-var UpdateSourceType;
-(function(UpdateSourceType2) {
-  UpdateSourceType2[UpdateSourceType2["ElectronPublicUpdateService"] = 0] = "ElectronPublicUpdateService";
-  UpdateSourceType2[UpdateSourceType2["StaticStorage"] = 1] = "StaticStorage";
-})(UpdateSourceType || (dist.UpdateSourceType = UpdateSourceType = {}));
-const pkg = require$$8;
-const userAgent = (0, node_util_1.format)("%s/%s (%s: %s)", pkg.name, pkg.version, node_os_1.default.platform(), node_os_1.default.arch());
-const supportedPlatforms = ["darwin", "win32"];
-const isHttpsUrl = (maybeURL) => {
+Object.defineProperty(U, "__esModule", { value: !0 });
+U.UpdateSourceType = void 0;
+var fe = U.updateElectronApp = ye;
+U.makeUserNotifier = q;
+const M = w(Y), he = w(ue), m = w(F), me = w(z), T = w(W), ge = w(h), ve = J, l = V;
+var g;
+(function(t) {
+  t[t.ElectronPublicUpdateService = 0] = "ElectronPublicUpdateService", t[t.StaticStorage = 1] = "StaticStorage";
+})(g || (U.UpdateSourceType = g = {}));
+const j = pe, be = (0, ve.format)("%s/%s (%s: %s)", j.name, j.version, T.default.platform(), T.default.arch()), _e = ["darwin", "win32"], L = (t) => {
   try {
-    const { protocol } = new URL(maybeURL);
-    return protocol === "https:";
-  } catch (_a) {
-    return false;
+    const { protocol: r } = new URL(t);
+    return r === "https:";
+  } catch {
+    return !1;
   }
 };
-function updateElectronApp(opts = {}) {
-  const safeOpts = validateInput(opts);
-  if (!electron_1.app.isPackaged) {
-    const message = "update-electron-app config looks good; aborting updates since app is in development mode";
-    if (opts.logger) {
-      opts.logger.log(message);
-    } else {
-      console.log(message);
-    }
+function ye(t = {}) {
+  const r = Ue(t);
+  if (!l.app.isPackaged) {
+    const e = "update-electron-app config looks good; aborting updates since app is in development mode";
+    t.logger ? t.logger.log(e) : console.log(e);
     return;
   }
-  if (electron_1.app.isReady()) {
-    initUpdater(safeOpts);
-  } else {
-    electron_1.app.on("ready", () => initUpdater(safeOpts));
-  }
+  l.app.isReady() ? I(r) : l.app.on("ready", () => I(r));
 }
-function initUpdater(opts) {
-  const { updateSource, updateInterval, logger } = opts;
-  if (!supportedPlatforms.includes(process === null || process === void 0 ? void 0 : process.platform)) {
-    log(`Electron's autoUpdater does not support the '${process.platform}' platform. Ref: https://www.electronjs.org/docs/latest/api/auto-updater#platform-notices`);
+function I(t) {
+  const { updateSource: r, updateInterval: e, logger: o } = t;
+  if (!_e.includes(process == null ? void 0 : process.platform)) {
+    s(`Electron's autoUpdater does not support the '${process.platform}' platform. Ref: https://www.electronjs.org/docs/latest/api/auto-updater#platform-notices`);
     return;
   }
-  let feedURL;
-  let serverType = "default";
-  switch (updateSource.type) {
-    case UpdateSourceType.ElectronPublicUpdateService: {
-      feedURL = `${updateSource.host}/${updateSource.repo}/${process.platform}-${process.arch}/${electron_1.app.getVersion()}`;
+  let a, c = "default";
+  switch (r.type) {
+    case g.ElectronPublicUpdateService: {
+      a = `${r.host}/${r.repo}/${process.platform}-${process.arch}/${l.app.getVersion()}`;
       break;
     }
-    case UpdateSourceType.StaticStorage: {
-      feedURL = updateSource.baseUrl;
-      if (process.platform === "darwin") {
-        feedURL += "/RELEASES.json";
-        serverType = "json";
-      }
+    case g.StaticStorage: {
+      a = r.baseUrl, process.platform === "darwin" && (a += "/RELEASES.json", c = "json");
       break;
     }
   }
-  const requestHeaders = { "User-Agent": userAgent };
-  function log(...args) {
-    logger.log(...args);
+  const p = { "User-Agent": be };
+  function s(...n) {
+    o.log(...n);
   }
-  log("feedURL", feedURL);
-  log("requestHeaders", requestHeaders);
-  electron_1.autoUpdater.setFeedURL({
-    url: feedURL,
-    headers: requestHeaders,
-    serverType
-  });
-  electron_1.autoUpdater.on("error", (err) => {
-    log("updater error");
-    log(err);
-  });
-  electron_1.autoUpdater.on("checking-for-update", () => {
-    log("checking-for-update");
-  });
-  electron_1.autoUpdater.on("update-available", () => {
-    log("update-available; downloading...");
-  });
-  electron_1.autoUpdater.on("update-not-available", () => {
-    log("update-not-available");
-  });
-  if (opts.notifyUser) {
-    electron_1.autoUpdater.on("update-downloaded", (event, releaseNotes, releaseName, releaseDate, updateURL) => {
-      log("update-downloaded", [event, releaseNotes, releaseName, releaseDate, updateURL]);
-      if (typeof opts.onNotifyUser !== "function") {
-        (0, node_assert_1.default)(opts.onNotifyUser === void 0, "onNotifyUser option must be a callback function or undefined");
-        log("update-downloaded: notifyUser is true, opening default dialog");
-        opts.onNotifyUser = makeUserNotifier();
-      } else {
-        log("update-downloaded: notifyUser is true, running custom onNotifyUser callback");
-      }
-      opts.onNotifyUser({
-        event,
-        releaseNotes,
-        releaseDate,
-        releaseName,
-        updateURL
-      });
+  s("feedURL", a), s("requestHeaders", p), l.autoUpdater.setFeedURL({
+    url: a,
+    headers: p,
+    serverType: c
+  }), l.autoUpdater.on("error", (n) => {
+    s("updater error"), s(n);
+  }), l.autoUpdater.on("checking-for-update", () => {
+    s("checking-for-update");
+  }), l.autoUpdater.on("update-available", () => {
+    s("update-available; downloading...");
+  }), l.autoUpdater.on("update-not-available", () => {
+    s("update-not-available");
+  }), t.notifyUser && l.autoUpdater.on("update-downloaded", (n, u, d, S, P) => {
+    s("update-downloaded", [n, u, d, S, P]), typeof t.onNotifyUser != "function" ? ((0, m.default)(t.onNotifyUser === void 0, "onNotifyUser option must be a callback function or undefined"), s("update-downloaded: notifyUser is true, opening default dialog"), t.onNotifyUser = q()) : s("update-downloaded: notifyUser is true, running custom onNotifyUser callback"), t.onNotifyUser({
+      event: n,
+      releaseNotes: u,
+      releaseDate: S,
+      releaseName: d,
+      updateURL: P
     });
-  }
-  electron_1.autoUpdater.checkForUpdates();
-  setInterval(() => {
-    electron_1.autoUpdater.checkForUpdates();
-  }, (0, ms_1.default)(updateInterval));
+  }), l.autoUpdater.checkForUpdates(), setInterval(() => {
+    l.autoUpdater.checkForUpdates();
+  }, (0, M.default)(e));
 }
-function makeUserNotifier(dialogProps) {
-  const defaultDialogMessages = {
+function q(t) {
+  const e = Object.assign({}, {
     title: "Application Update",
     detail: "A new version has been downloaded. Restart the application to apply the updates.",
     restartButtonText: "Restart",
     laterButtonText: "Later"
-  };
-  const assignedDialog = Object.assign({}, defaultDialogMessages, dialogProps);
-  return (info) => {
-    const { releaseNotes, releaseName } = info;
-    const { title, restartButtonText, laterButtonText, detail } = assignedDialog;
-    const dialogOpts = {
+  }, t);
+  return (o) => {
+    const { releaseNotes: a, releaseName: c } = o, { title: p, restartButtonText: s, laterButtonText: n, detail: u } = e, d = {
       type: "info",
-      buttons: [restartButtonText, laterButtonText],
-      title,
-      message: process.platform === "win32" ? releaseNotes : releaseName,
-      detail
+      buttons: [s, n],
+      title: p,
+      message: process.platform === "win32" ? a : c,
+      detail: u
     };
-    electron_1.dialog.showMessageBox(dialogOpts).then(({ response }) => {
-      if (response === 0) {
-        electron_1.autoUpdater.quitAndInstall();
-      }
+    l.dialog.showMessageBox(d).then(({ response: S }) => {
+      S === 0 && l.autoUpdater.quitAndInstall();
     });
   };
 }
-function guessRepo() {
-  var _a;
-  const pkgBuf = node_fs_1.default.readFileSync(node_path_1.default.join(electron_1.app.getAppPath(), "package.json"));
-  const pkg2 = JSON.parse(pkgBuf.toString());
-  const repoString = ((_a = pkg2.repository) === null || _a === void 0 ? void 0 : _a.url) || pkg2.repository;
-  const repoObject = (0, github_url_to_object_1.default)(repoString);
-  (0, node_assert_1.default)(repoObject, "repo not found. Add repository string to your app's package.json file");
-  return `${repoObject.user}/${repoObject.repo}`;
+function we() {
+  var t;
+  const r = me.default.readFileSync(ge.default.join(l.app.getAppPath(), "package.json")), e = JSON.parse(r.toString()), o = ((t = e.repository) === null || t === void 0 ? void 0 : t.url) || e.repository, a = (0, he.default)(o);
+  return (0, m.default)(a, "repo not found. Add repository string to your app's package.json file"), `${a.user}/${a.repo}`;
 }
-function validateInput(opts) {
-  var _a;
-  const defaults = {
+function Ue(t) {
+  var r;
+  const e = {
     host: "https://update.electronjs.org",
     updateInterval: "10 minutes",
     logger: console,
-    notifyUser: true
-  };
-  const { host, updateInterval, logger, notifyUser, onNotifyUser } = Object.assign({}, defaults, opts);
-  let updateSource = opts.updateSource;
-  if (!updateSource) {
-    updateSource = {
-      type: UpdateSourceType.ElectronPublicUpdateService,
-      repo: opts.repo || guessRepo(),
-      host
-    };
-  }
-  switch (updateSource.type) {
-    case UpdateSourceType.ElectronPublicUpdateService: {
-      (0, node_assert_1.default)((_a = updateSource.repo) === null || _a === void 0 ? void 0 : _a.includes("/"), "repo is required and should be in the format `owner/repo`");
-      if (!updateSource.host) {
-        updateSource.host = host;
-      }
-      (0, node_assert_1.default)(updateSource.host && isHttpsUrl(updateSource.host), "host must be a valid HTTPS URL");
+    notifyUser: !0
+  }, { host: o, updateInterval: a, logger: c, notifyUser: p, onNotifyUser: s } = Object.assign({}, e, t);
+  let n = t.updateSource;
+  switch (n || (n = {
+    type: g.ElectronPublicUpdateService,
+    repo: t.repo || we(),
+    host: o
+  }), n.type) {
+    case g.ElectronPublicUpdateService: {
+      (0, m.default)((r = n.repo) === null || r === void 0 ? void 0 : r.includes("/"), "repo is required and should be in the format `owner/repo`"), n.host || (n.host = o), (0, m.default)(n.host && L(n.host), "host must be a valid HTTPS URL");
       break;
     }
-    case UpdateSourceType.StaticStorage: {
-      (0, node_assert_1.default)(updateSource.baseUrl && isHttpsUrl(updateSource.baseUrl), "baseUrl must be a valid HTTPS URL");
+    case g.StaticStorage: {
+      (0, m.default)(n.baseUrl && L(n.baseUrl), "baseUrl must be a valid HTTPS URL");
       break;
     }
   }
-  (0, node_assert_1.default)(typeof updateInterval === "string" && updateInterval.match(/^\d+/), "updateInterval must be a human-friendly string interval like `20 minutes`");
-  (0, node_assert_1.default)((0, ms_1.default)(updateInterval) >= 5 * 60 * 1e3, "updateInterval must be `5 minutes` or more");
-  (0, node_assert_1.default)(logger && typeof logger.log, "function");
-  return { updateSource, updateInterval, logger, notifyUser, onNotifyUser };
+  return (0, m.default)(typeof a == "string" && a.match(/^\d+/), "updateInterval must be a human-friendly string interval like `20 minutes`"), (0, m.default)((0, M.default)(a) >= 5 * 60 * 1e3, "updateInterval must be `5 minutes` or more"), (0, m.default)(c && typeof c.log, "function"), { updateSource: n, updateInterval: a, logger: c, notifyUser: p, onNotifyUser: s };
 }
-const initLinkHandler = () => {
-  ipcMain.handle("open-external", (_e, url) => {
-    return shell.openExternal(url);
+const Se = () => {
+  O.handle("open-external", (t, r) => C.openExternal(r));
+}, E = "tabzero", D = async (t, r) => {
+  const e = new URL(r);
+  if (!e.protocol.startsWith(E)) return "not a valid url";
+  const o = new URLSearchParams(e.search), a = o.get("code"), c = o.get("scope");
+  if (!a || !c) return "no scope or code";
+  t.webContents.send("auth", { code: a, scope: c });
+}, Re = (t) => {
+  f.setAsDefaultProtocolClient(E), f.on("open-url", async (r, e) => {
+    D(t, e);
   });
-};
-const PROTOCOL = "tabzero";
-const handleProtocolUrl = async (window2, rawUrl) => {
-  const url = new URL(rawUrl);
-  if (!url.protocol.startsWith(PROTOCOL)) return "not a valid url";
-  const searchParams = new URLSearchParams(url.search);
-  const code = searchParams.get("code");
-  const scope = searchParams.get("scope");
-  if (!code || !scope) return "no scope or code";
-  window2.webContents.send("auth", { code, scope });
-};
-const initAuthRedirectHandler = (window2) => {
-  app.setAsDefaultProtocolClient(PROTOCOL);
-  app.on("open-url", async (_event, rawUrl) => {
-    handleProtocolUrl(window2, rawUrl);
-  });
-};
-const isValidAccelerator = (accelerator) => {
+}, ke = (t) => {
   try {
-    globalShortcut.register(accelerator, () => {
-    });
-    globalShortcut.unregister(accelerator);
-    return true;
+    return k.register(t, () => {
+    }), k.unregister(t), !0;
   } catch {
-    return false;
+    return !1;
   }
-};
-const initHotkeyHandler = (window2) => {
-  const hotkeys = {};
-  ipcMain.handle(
+}, $e = (t) => {
+  const r = {};
+  O.handle(
     "register-hotkey",
-    (_e, options) => {
-      if (!isValidAccelerator(options.keys)) {
-        console.error(`[Hotkey] Invalid accelerator: ${options.keys}`);
-        return false;
-      }
-      const previous = hotkeys[options.name];
-      if (previous) globalShortcut.unregister(previous);
-      hotkeys[options.name] = options.keys;
-      globalShortcut.register(options.keys, () => {
-        console.log(`[Hotkey] ${options.name}`);
-        window2.webContents.send("hotkey", options.name);
-      });
-      return true;
+    (e, o) => {
+      if (!ke(o.keys))
+        return console.error(`[Hotkey] Invalid accelerator: ${o.keys}`), !1;
+      const a = r[o.name];
+      return a && k.unregister(a), r[o.name] = o.keys, k.register(o.keys, () => {
+        console.log(`[Hotkey] ${o.name}`), t.webContents.send("hotkey", o.name);
+      }), !0;
     }
   );
 };
-createRequire(import.meta.url);
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-process.env.APP_ROOT = path.join(__dirname, "..");
-const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
-const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
-const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
-process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
-let win;
-updateElectronApp_1();
-function createWindow() {
-  win = new BrowserWindow({
-    icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+G(import.meta.url);
+const N = h.dirname(K(import.meta.url));
+process.env.APP_ROOT = h.join(N, "..");
+const $ = process.env.VITE_DEV_SERVER_URL, He = h.join(process.env.APP_ROOT, "dist-electron"), x = h.join(process.env.APP_ROOT, "dist");
+process.env.VITE_PUBLIC = $ ? h.join(process.env.APP_ROOT, "public") : x;
+let i;
+fe();
+function B() {
+  i = new H({
+    icon: h.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
-      preload: path.join(__dirname, "preload.mjs"),
-      devTools: true
+      preload: h.join(N, "preload.mjs"),
+      devTools: !0
     },
-    autoHideMenuBar: true
-  });
-  win.webContents.on("did-finish-load", () => {
-    win == null ? void 0 : win.webContents.send("main-process-message", { hello: "world" });
-  });
-  if (VITE_DEV_SERVER_URL) {
-    win.loadURL(VITE_DEV_SERVER_URL);
-  } else {
-    win.loadFile(path.join(RENDERER_DIST, "index.html"));
-  }
-  initAuthRedirectHandler(win);
-  initHotkeyHandler(win);
+    autoHideMenuBar: !0
+  }), i.webContents.on("did-finish-load", () => {
+    i == null || i.webContents.send("main-process-message", { hello: "world" });
+  }), $ ? i.loadURL($) : i.loadFile(h.join(x, "index.html")), Re(i), $e(i);
 }
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-    win = null;
-  }
+f.on("window-all-closed", () => {
+  process.platform !== "darwin" && (f.quit(), i = null);
 });
-app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
+f.on("activate", () => {
+  H.getAllWindows().length === 0 && B();
 });
-initLinkHandler();
-if (!app.requestSingleInstanceLock()) {
-  app.quit();
-} else {
-  const handleArgs = async (argv) => {
-    if (!win) return;
-    const url = argv.find((arg) => arg.startsWith(`${PROTOCOL}://`));
-    if (!url) return;
-    handleProtocolUrl(win, url);
+Se();
+if (!f.requestSingleInstanceLock())
+  f.quit();
+else {
+  const t = async (r) => {
+    if (!i) return;
+    const e = r.find((o) => o.startsWith(`${E}://`));
+    e && D(i, e);
   };
-  app.on("second-instance", (_event, argv) => {
-    handleArgs(argv);
-    if (win) {
-      if (win.isMinimized()) win.restore();
-      win.focus();
-    }
-  });
-  app.whenReady().then(() => {
-    createWindow();
-    handleArgs(process.argv);
+  f.on("second-instance", (r, e) => {
+    t(e), i && (i.isMinimized() && i.restore(), i.focus());
+  }), f.whenReady().then(() => {
+    B(), t(process.argv);
   });
 }
 export {
-  MAIN_DIST,
-  RENDERER_DIST,
-  VITE_DEV_SERVER_URL
+  He as MAIN_DIST,
+  x as RENDERER_DIST,
+  $ as VITE_DEV_SERVER_URL
 };

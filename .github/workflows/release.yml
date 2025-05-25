@@ -14,18 +14,21 @@ jobs:
         os: [macos-latest, windows-latest]
 
     steps:
-      - name: Checkout code
+      - name: 🛒 Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: 🔧 Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 22 # Or your project's Node.js version
+          node-version: 22
 
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: npm install
 
-      - name: Make and Publish
+      - name: 🏗️ Build
+        run: npm run build
+
+      - name: 🌍 Make & Publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run app:publish
