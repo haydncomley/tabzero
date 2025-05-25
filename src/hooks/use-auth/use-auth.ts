@@ -37,7 +37,7 @@ export const useAuth = () => {
 		enabled: !!user?.uid,
 	});
 
-	const { mutateAsync: login } = useMutation({
+	const { mutateAsync: login, isPending: isLoggingIn } = useMutation({
 		mutationFn: () =>
 			new Promise(async (res, rej) => {
 				const authTwitch = httpsCallable<void, { url: string }>(
@@ -87,6 +87,7 @@ export const useAuth = () => {
 
 	return {
 		login,
+		isLoggingIn,
 		logout,
 		isLoggingOut,
 		ready,

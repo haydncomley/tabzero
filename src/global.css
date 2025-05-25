@@ -1,12 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Reddit+Sans:ital,wght@0,200..900;1,200..900&display=swap');
+
 @import 'tailwindcss';
 
 @theme {
-	--color-background: #181818;
-	--color-foreground: #f5f5f5;
-	--color-outline: #2c2c2c;
+	--color-background: #20201a;
+	--color-foreground: #fafafa;
+	--color-outline: #3d3d3d;
 
-	--color-brand: #ff8600;
-	--color-brand-glint: #ffa541;
+	--color-brand: #606dff;
+	--color-brand-glint: #939cff;
 	--color-brand-foreground: #ffffff;
 
 	--color-danger: #cd412b;
@@ -36,6 +38,7 @@ html,
 body,
 #root {
 	@apply bg-background text-foreground h-full w-full;
+	font-family: 'Reddit Sans', monospace;
 }
 
 #root {

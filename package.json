@@ -11,14 +11,16 @@
 		"url": "https://github.com/haydncomley/tabzero.git"
 	},
 	"scripts": {
+		"---------- DEVELOPMENT ----------": "",
 		"dev": "vite",
 		"build": "tsc && vite build",
+		"start": "electron-forge start",
+		"api": "FIRESTORE_EMULATOR_HOST=localhost:8080 firebase emulators:start",
+		"---------- MISC ----------": "",
 		"lint": "eslint . --report-unused-disable-directives --max-warnings 0",
-		"preview": "vite preview",
 		"format": "prettier --write ./src",
+		"---------- DEPLOYMENT ----------": "",
 		"api:deploy": "firebase deploy --only=functions",
-		"api:emulate": "FIRESTORE_EMULATOR_HOST=localhost:8080 firebase emulators:start",
-		"app:start": "electron-forge start",
 		"app:package": "electron-forge package",
 		"app:make": "electron-forge make",
 		"app:publish": "electron-forge publish"
