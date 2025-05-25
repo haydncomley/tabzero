@@ -27,15 +27,15 @@ jobs:
           node-version: 22
 
       - name: 📦 Install dependencies
-        run: npm install
+        run: yarn install
 
       - name: 🏗️ Build
-        run: npm run build
+        run: yarn build
 
       - name: 🌍 Make & Publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run app:publish
+        run: yarn app:publish
 
 permissions:
   contents: write
