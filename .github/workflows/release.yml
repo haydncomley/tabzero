@@ -25,6 +25,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 22
+          cache: 'yarn'
 
       - name: Force Git to use HTTPS for GitHub URLs
         run: |
