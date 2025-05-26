@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import { AudioLines, Check, Loader2, X } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 
 import { useAudioPlayer } from '~/hooks/use-audio-player';
 import { useLog } from '~/hooks/use-log';
@@ -25,11 +25,11 @@ export default function Page() {
 		});
 	}, [audioUrl]);
 
-	const isLastTranscriptionNew = useMemo(() => {
-		if (!transcription) return false;
-		if (!log[0].text) return false;
-		return transcription !== log[0].text;
-	}, [transcription, log[0]?.text]);
+	// const isLastTranscriptionNew = useMemo(() => {
+	// 	if (!transcription) return false;
+	// 	if (!log[0].text) return false;
+	// 	return transcription !== log[0].text;
+	// }, [transcription, log[0]?.text]);
 
 	return (
 		<main>
