@@ -10,7 +10,7 @@ export const auth = getAuth(app);
 export const storage = getStorage(app);
 
 export const CONFIG = {
-	version: '0.0.1',
+	version: '0.1.0',
 };
 
 export const openaiKey = defineSecret('OPENAI_KEY');

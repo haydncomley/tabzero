@@ -4,12 +4,14 @@ import { Loader2 } from 'lucide-react';
 type ButtonProps = {
 	loading?: boolean;
 	variant?: 'primary' | 'secondary' | 'tertiary';
+	size?: 'regular' | 'small';
 } & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const Button = ({
 	className,
 	loading,
 	variant = 'primary',
+	size = 'regular',
 	children,
 	...props
 }: ButtonProps) => (
@@ -17,8 +19,10 @@ export const Button = ({
 		{...props}
 		className={classNames(
 			className,
-			'relative flex items-center justify-center gap-3 rounded-lg border p-2.5 px-4 text-sm transition-all duration-75 hover:cursor-pointer',
+			'relative flex items-center justify-center border text-sm transition-all duration-75 hover:cursor-pointer',
 			{
+				'gap-3 rounded-lg p-2.5 px-4': size === 'regular',
+				'gap-2 rounded-full p-2 px-2': size === 'small',
 				'bg-brand border-brand-glint text-brand-foreground hover:bg-brand-glint':
 					variant === 'primary',
 				'bg-background border-outline text-foreground hover:bg-outline':

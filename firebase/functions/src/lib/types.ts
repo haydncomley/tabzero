@@ -32,6 +32,8 @@ export type tabzeroTool<T extends z.ZodSchema, K extends string = string> = {
     description: string,
     parameters: T,
     scopes: `${Vendor}@${string}`[],
+    infoName: string,
+    infoDescription: string,
     clientDetails: (args: z.infer<T>) => ({ name: string, context: string }),
     function: (args: z.infer<T> & { user: tabzeroUser }) => Promise<{ success: boolean, message?: string, tts?: string }>
 }

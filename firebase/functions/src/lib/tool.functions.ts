@@ -76,5 +76,4 @@ export const tool = onCall({ secrets: [twitchClientId, twitchClientSecret, opena
     await logRef.update(log);
 
     return resultsMapped;
-
 });

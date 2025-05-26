@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 
+import { useDebounce } from '../use-debounce';
 import { useHotkey } from '../use-hotkey';
 import type { HOTKEYS } from '../use-hotkey/lib/constants';
 import { useRecorder } from '../use-recorder';
@@ -19,6 +20,7 @@ export const useSpeechToText = ({
 		audioUrl,
 	} = useRecorder();
 
+	const isRecordingDebounced = useDebounce(isRecording, 150);
 	const { transcribe, isTranscribing, transcription } = useTranscriber();
 
 	const toggleRecording = useMemo(() => {
@@ -39,10 +41,10 @@ export const useSpeechToText = ({
 	}, [transcription, isTranscribing, isRecording]);
 
 	const isLoading = useMemo(() => {
-		if (isRecording) return true;
+		if (isRecording || isRecordingDebounced) return true;
 		if (isTranscribing) return true;
 		return false;
-	}, [isRecording, isTranscribing]);
+	}, [isRecording, isTranscribing, isRecordingDebounced]);
 
 	return {
 		state,

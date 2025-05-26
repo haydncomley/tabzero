@@ -10,6 +10,7 @@ const toolSchema = z.object({
 })
 
 export const twitchStreamChangeTitle = {
+    // LLM
     name: 'twitchStreamChangeTitle',
     description: 'Change the title of the Twitch stream',
     parameters: toolSchema,
@@ -18,6 +19,10 @@ export const twitchStreamChangeTitle = {
         name: "Update Title",
         context: `"${title}"`
     }),
+    // User
+    infoName: 'Twitch: Update Title',
+    infoDescription: 'Update the title of your Twitch stream.',
+    // Action
     function: async ({ title, user }) => {
         const provider = new StaticAuthProvider(twitchClientId.value(), user.providers[user.provider].access_token);
         const api = new ApiClient({ authProvider: provider });

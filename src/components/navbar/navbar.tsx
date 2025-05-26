@@ -1,6 +1,9 @@
+import classNames from 'classnames';
 import { LogOut, Moon, Sun, TicketPlus, TicketX } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { useAuth } from '~/hooks/use-auth';
+import { useMeta } from '~/hooks/use-meta';
 import { useSetting } from '~/hooks/use-setting';
 
 import { version } from '../../../package.json';
@@ -16,10 +19,19 @@ export const Navbar = () => {
 		isSubscribing,
 		cancel,
 		isCancelling,
-		apiVersion,
 		resume,
 		isResuming,
 	} = useAuth();
+	const { version: apiVersion } = useMeta();
+	const [lastApiVersion, setLastApiVersion] = useSetting('lastApiVersion');
+	const [isNewVersion, setIsNewVersion] = useState(false);
+
+	useEffect(() => {
+		if (lastApiVersion !== apiVersion && apiVersion) {
+			setLastApiVersion(apiVersion);
+			setIsNewVersion(true);
+		}
+	}, [apiVersion]);
 
 	return (
 		<nav className="flex w-full items-center justify-between border-b p-3">
@@ -27,8 +39,16 @@ export const Navbar = () => {
 				<Logo className="h-10 w-10"></Logo>
 				<div className="ml-2 flex flex-col">
 					<h1 className="text-xl font-bold">tabzero</h1>
-					<p className="text-xs opacity-50">
-						Client v{version} - API v{apiVersion ?? 'unknown'}
+					<p className="text-foreground/50 text-xs">
+						Client v{version} -{' '}
+						<span
+							className={classNames({
+								'text-brand': isNewVersion,
+							})}
+						>
+							API v{apiVersion}
+							{isNewVersion ? ' (UPDATED)' : ''}
+						</span>
 					</p>
 				</div>
 			</div>

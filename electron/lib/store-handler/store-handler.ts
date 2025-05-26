@@ -4,6 +4,7 @@ import Store from 'electron-store';
 const store = new Store<{
 	darkMode: boolean;
 	deviceId?: string;
+	lastApiVersion?: string;
 }>({
 	defaults: {
 		darkMode: false,

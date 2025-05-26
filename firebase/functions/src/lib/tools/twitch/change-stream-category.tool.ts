@@ -10,6 +10,7 @@ const toolSchema = z.object({
 })
 
 export const twitchStreamChangeCategory = {
+    // LLM
     name: 'twitchStreamChangeCategory',
     description: 'Change the category/game of the Twitch stream',
     parameters: toolSchema,
@@ -18,6 +19,10 @@ export const twitchStreamChangeCategory = {
         name: "Update Category",
         context: `"${twitchCategory}"`
     }),
+    // User
+    infoName: 'Twitch: Change Category',
+    infoDescription: 'Change the category/game of your Twitch stream.',
+    // Action
     function: async ({ twitchCategory, user }) => {
         const provider = new StaticAuthProvider(twitchClientId.value(), user.providers[user.provider].access_token);
         const api = new ApiClient({ authProvider: provider });

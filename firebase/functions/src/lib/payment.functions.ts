@@ -3,7 +3,7 @@ import { firestore, stripeKey, stripePriceId, stripeWebhookSecret } from '../con
 import { tabzeroUser } from './types';
 import { getStripe } from '../vendor/stripe.vendor';
 
-export const stripeWebhook = onRequest({ secrets: [stripeKey] }, async (request, response) => {
+export const stripeWebhook = onRequest({ secrets: [stripeKey, stripeWebhookSecret] }, async (request, response) => {
 	const sig = request.headers['stripe-signature'];
 	let event;
 	const stripe = getStripe();
