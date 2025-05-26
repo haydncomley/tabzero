@@ -8,6 +8,8 @@ import { ChatCompletionMessageToolCall } from 'openai/resources/index.mjs';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { TOOLS } from './tools';
+import { firestore } from '../config';
+import { FieldValue } from 'firebase-admin/firestore';
 
 export const aiChat = onCall(async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'User must be authenticated');
@@ -130,7 +132,25 @@ export const aiToolResolver = onCall(async (request) => {
         tools.push(...toolsNeeded);
     }
 
+    const userRef = firestore.collection('users').doc(request.auth.uid);
+    const logRef = userRef.collection('log').doc();
+
+    const toolAction = {
+        id: logRef.id,
+        name: 'Transcription',
+        text: prompt,
+        timestamp: FieldValue.serverTimestamp(),
+        tools: tools.map((tool) => ({
+            ...TOOLS.find((t) => t.name === tool.function.name)?.clientDetails(JSON.parse(tool.function.arguments)),
+            id: tool.id,
+            status: 'pending',
+            details: tool.function
+        })),
+    };
+    
+    await logRef.set(toolAction);
+
     return {
-        tools,
+        action: toolAction,
     };
 });

@@ -1,14 +1,13 @@
 import { HttpsError, onCall } from 'firebase-functions/https';
-import { ChatCompletionMessageToolCall } from 'openai/resources/index.mjs';
 import { TOOLS } from './tools';
 import { CONFIG, firestore } from '../config';
-import { tabzeroUser } from './types';
+import { tabzeroToolAction, tabzeroUser } from './types';
 
 export const tool = onCall(async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'User must be authenticated');
 
-    const { tools } = request.data as { tools: ChatCompletionMessageToolCall[], token: string };
-    if (!tools || !tools.length) throw new HttpsError('invalid-argument', 'Missing tools');
+    const { action } = request.data as { action: tabzeroToolAction };
+    if (!action) throw new HttpsError('invalid-argument', 'Missing action');
 
     const userRef = firestore.collection('users').doc(request.auth.uid);
     const doc = await userRef.get();
@@ -39,11 +38,11 @@ export const tool = onCall(async (request) => {
         user.providers.twitch.expires_in = Date.now() + ((expires_in - 60) * 1000);
     }
 
-    const toolsToRun = tools.map((tool) => ({
+    const toolsToRun = action.tools.map((tool) => ({
         id: tool.id,
-        name: tool.function.name,
-        arguments: JSON.parse(tool.function.arguments),
-        tool: TOOLS.find((t) => t.name === tool.function.name),
+        name: tool.details.name,
+        arguments: JSON.parse(tool.details.arguments),
+        tool: TOOLS.find((t) => t.name === tool.details.name),
     })).filter((tool) => !!tool.tool);
 
     const results = await Promise.all(toolsToRun.map((tool) => tool.tool?.function({ 
@@ -55,6 +54,26 @@ export const tool = onCall(async (request) => {
         id: toolsToRun[index].id,
         result
     }));
+
+    const logRef = userRef.collection('log').doc(action.id);
+    const log = (await logRef.get()).data() as tabzeroToolAction;
+
+    for (const result of resultsMapped) {
+        const toolIndex = log.tools.findIndex((t) => t.id === result.id);
+        if (toolIndex !== -1) {
+            if (typeof result.result?.success !== 'undefined') {
+                log.tools[toolIndex].status = result.result.success ? 'success' : 'error'
+            } else {
+                log.tools[toolIndex].status = 'error'
+            }
+
+            if (result.result?.tts) {
+                log.tools[toolIndex].tts = result.result?.tts;
+            }
+        }
+    }
+
+    await logRef.update(log);
 
     return resultsMapped;
 

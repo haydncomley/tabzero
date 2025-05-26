@@ -3,6 +3,9 @@ import { httpsCallable } from 'firebase/functions';
 
 import { functions } from '../../main';
 import { useAudioPlayer } from '../use-audio-player';
+import type { tabzeroToolAction } from './lib/types';
+
+const previousTextResolutions: string[] = [];
 
 export const useToolResolver = () => {
 	const { speak } = useAudioPlayer();
@@ -13,49 +16,33 @@ export const useToolResolver = () => {
 	} = useMutation({
 		mutationKey: ['resolveTools'],
 		mutationFn: async (options: { transcription: string }) => {
+			if (previousTextResolutions.includes(options.transcription)) {
+				return null;
+			}
+
+			previousTextResolutions.push(options.transcription);
+
 			const aiToolResolver = httpsCallable<
 				{ prompt: string },
 				{
-					tools: {
-						id: string;
-						type: 'function';
-						function: {
-							arguments: string;
-							name: string;
-						};
-					}[];
+					action: tabzeroToolAction;
 				}
 			>(functions, 'aiToolResolver');
 
 			const { data } = await aiToolResolver({
 				prompt: options.transcription,
 			});
-			return data.tools;
+
+			return data.action;
 		},
 	});
 
 	const { mutateAsync: runTools, isPending: isRunningTools } = useMutation({
 		mutationKey: ['runTools'],
-		mutationFn: async (options: {
-			tools: {
-				id: string;
-				type: 'function';
-				function: {
-					arguments: string;
-					name: string;
-				};
-			}[];
-		}) => {
+		mutationFn: async (options: { action: tabzeroToolAction }) => {
 			const toolRunner = httpsCallable<
 				{
-					tools: {
-						id: string;
-						type: 'function';
-						function: {
-							arguments: string;
-							name: string;
-						};
-					}[];
+					action: tabzeroToolAction;
 				},
 				{
 					id: string;
@@ -71,7 +58,7 @@ export const useToolResolver = () => {
 			>(functions, 'tool');
 
 			const { data } = await toolRunner({
-				tools: options.tools,
+				action: options.action,
 			});
 
 			data.forEach((tool) => {

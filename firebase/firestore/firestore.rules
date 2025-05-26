@@ -8,6 +8,11 @@ service cloud.firestore {
       // Writes to this path (e.g., updating their own details) are denied by default
       // as no specific rule allows it.
       // Access to any other paths or collections is also denied by default.
+
+      // Allow users to read and write documents in their 'log' subcollection
+      match /log/{document=**} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+      }
     }
   }
 }

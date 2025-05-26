@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { useHotkey } from '../use-hotkey';
 import type { HOTKEYS } from '../use-hotkey/lib/constants';
@@ -6,9 +6,9 @@ import { useRecorder } from '../use-recorder';
 import { useTranscriber } from '../use-transcription';
 
 export const useSpeechToText = ({
-	hotkey,
+	hotkey = 'toggleRecording',
 }: {
-	hotkey: keyof typeof HOTKEYS;
+	hotkey?: keyof typeof HOTKEYS;
 }) => {
 	const { startRecording, stopRecording, isRecording, audioBlob, devices } =
 		useRecorder();
@@ -25,12 +25,6 @@ export const useSpeechToText = ({
 		else stopRecording();
 	}, [isRecording]);
 
-	useEffect(() => {
-		if (!audioBlob) return;
-
-		transcribe({ audio: audioBlob });
-	}, [audioBlob]);
-
 	const state = useMemo<'recording' | 'transcribing' | 'idle' | 'done'>(() => {
 		if (isRecording) return 'recording';
 		if (isTranscribing) return 'transcribing';
@@ -46,6 +40,10 @@ export const useSpeechToText = ({
 
 	return {
 		state,
+		transcribe: () => {
+			if (!audioBlob) return Promise.resolve(null);
+			return transcribe({ audio: audioBlob });
+		},
 		transcription,
 		toggleRecording,
 		startRecording,

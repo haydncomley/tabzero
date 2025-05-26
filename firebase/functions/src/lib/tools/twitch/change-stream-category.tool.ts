@@ -6,19 +6,19 @@ import { CONFIG } from "../../../config";
 import { HttpsError } from "firebase-functions/https";
 
 const toolSchema = z.object({
-    title: z.string(),
+    twitchCategory: z.string(),
 })
 
-export const twitchStreamChangeTitle = {
-    name: 'twitchStreamChangeTitle',
-    description: 'Change the title of the stream',
+export const twitchStreamChangeCategory = {
+    name: 'twitchStreamChangeCategory',
+    description: 'Change the category of the Twitch stream',
     parameters: toolSchema,
     scopes: ['twitch@channel:manage:broadcast'],
-    clientDetails: ({ title }) => ({
-        name: "Update Title",
-        context: `"${title}"`
+    clientDetails: ({ twitchCategory }) => ({
+        name: "Update Category",
+        context: `"${twitchCategory}"`
     }),
-    function: async ({ title, user }) => {
+    function: async ({ twitchCategory, user }) => {
         const provider = new StaticAuthProvider(CONFIG.twitch.client_id, user.providers[user.provider].access_token);
         const api = new ApiClient({ authProvider: provider });
         
@@ -26,14 +26,23 @@ export const twitchStreamChangeTitle = {
         
         if (!userId) throw new HttpsError('invalid-argument', 'User validation failed');
 
+        const games = await api.games.getGamesByNames([twitchCategory])
+
+        if (games.length === 0) {
+            return {
+                success: false,
+                message: `"${twitchCategory}" not found`,
+            }
+        };
+
         try {
             await api.channels.updateChannelInfo(userId, {
-                title: title,
+                gameId: games[0].id,
             })
             return { success: true }
         } catch (error) {
             console.error(error);
-            throw new HttpsError('internal', 'Failed to change stream title');
+            throw new HttpsError('internal', 'Failed to change stream category');
         }
     }
 } as const satisfies tabzeroTool<typeof toolSchema>

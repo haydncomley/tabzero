@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 
 import { Navbar } from '~/components/navbar';
+import { SettingsBar } from '~/components/settings-bar';
 import { useAuth } from '~/hooks/use-auth';
 
 export default function Page() {
@@ -16,6 +17,7 @@ export default function Page() {
 	return (
 		<div className="flex h-full w-full flex-col">
 			<Navbar />
+			<SettingsBar />
 			<Outlet />
 		</div>
 	);

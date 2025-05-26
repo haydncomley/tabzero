@@ -22,7 +22,9 @@ export default function Page() {
 			<div className="flex flex-col">
 				<h1 className="relative text-4xl font-bold">
 					tabzero
-					<span className="absolute top-0 text-xs font-normal">BETA</span>
+					<span className="absolute top-0 text-xs font-normal">
+						EARLY ACCESS
+					</span>
 				</h1>
 				<p>AI Stream Assistant - Never tab out again.</p>
 
@@ -32,7 +34,7 @@ export default function Page() {
 						loading={!ready || isLoggingIn}
 						variant="secondary"
 					>
-						<LogIn></LogIn>
+						<LogIn className="h-4 w-4"></LogIn>
 						Login with Twitch
 					</Button>
 				</div>

@@ -16,5 +16,5 @@ export type tabzeroUser = {
 	};
 	stripe_customer_id?: string;
 	stripe_subscription_id?: string;
-	stripe_subscription_status?: boolean;
+	stripe_subscription_status?: 'active' | 'active-canceled' | 'inactive';
 };

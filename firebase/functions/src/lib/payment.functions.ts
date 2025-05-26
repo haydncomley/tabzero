@@ -67,7 +67,7 @@ export const stripeWebhook = onRequest(async (request, response) => {
 			if (!users.empty) {
 				await users.docs[0].ref.update({
 					stripe_subscription_id: subscription,
-					stripe_subscription_status: true,
+					stripe_subscription_status: 'active',
 				});
 			}
 			break;
@@ -83,7 +83,7 @@ export const stripeWebhook = onRequest(async (request, response) => {
 
 			if (!users.empty) {
 				await users.docs[0].ref.update({
-					stripe_subscription_status: false,
+					stripe_subscription_status: 'inactive',
 				});
 			}
 			break;
@@ -106,6 +106,6 @@ export const stripeCancel = onCall(async (request) => {
 		throw new HttpsError('failed-precondition', 'No active subscription');
 
 	await stripe.subscriptions.cancel(stripe_subscription_id);
-	await userRef.update({ stripe_subscription_status: false });
+	await userRef.update({ stripe_subscription_status: 'active-canceled' });
 	return { canceled: true };
 });

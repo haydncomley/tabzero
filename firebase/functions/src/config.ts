@@ -9,6 +9,7 @@ export const auth = getAuth(app);
 export const storage = getStorage(app);
 
 export const CONFIG = {
+	version: '0.0.1',
 	twitch: {
 		client_id: 'wf0v2o5emovybh5acdn3s1r9c4g8gj',
 		client_secret: 'vaiuqju72iyllyedg575lzsskh1gis',

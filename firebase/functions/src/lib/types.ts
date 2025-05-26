@@ -1,4 +1,5 @@
 import { Timestamp } from 'firebase-admin/firestore';
+import { ChatCompletionMessageToolCall } from 'openai/resources/index.mjs';
 import type { z } from 'zod' 
 
 type Vendor = 'twitch';
@@ -31,5 +32,21 @@ export type tabzeroTool<T extends z.ZodSchema, K extends string = string> = {
     description: string,
     parameters: T,
     scopes: `${Vendor}@${string}`[],
-    function: (args: z.infer<T> & { user: tabzeroUser }) => Promise<{ success: boolean, message: string, tts?: string }>
+    clientDetails: (args: z.infer<T>) => ({ name: string, context: string }),
+    function: (args: z.infer<T> & { user: tabzeroUser }) => Promise<{ success: boolean, message?: string, tts?: string }>
+}
+
+export type tabzeroToolAction = {
+    id: string,
+    name: string,
+    text: string,
+    timestamp: Timestamp,
+    tools: {
+        id: string,
+        name: string,
+        context: string,
+        status: 'pending' | 'success' | 'error',
+        details: ChatCompletionMessageToolCall.Function,
+        tts?: string
+    }[]
 }
