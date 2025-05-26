@@ -12,14 +12,8 @@ import { useToolResolver } from '~/hooks/use-tool-resolver';
 export default function Page() {
 	const { subscribe, isSubscribing, details } = useAuth();
 	const { log } = useLog();
-	const {
-		transcribe,
-		audioUrl,
-		transcription,
-		isLoading,
-		isTranscribing,
-		state,
-	} = useSpeechToText({});
+	const { transcribe, audioUrl, transcription, isLoading, state } =
+		useSpeechToText({});
 	const { resolveTools, runTools } = useToolResolver();
 
 	useEffect(() => {

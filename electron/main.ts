@@ -1,5 +1,5 @@
 import { app, BrowserWindow } from 'electron';
-import { updateElectronApp, UpdateSourceType } from 'update-electron-app';
+import { updateElectronApp } from 'update-electron-app';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
