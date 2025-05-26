@@ -11,7 +11,7 @@ const toolSchema = z.object({
 
 export const twitchStreamChangeCategory = {
     name: 'twitchStreamChangeCategory',
-    description: 'Change the category of the Twitch stream',
+    description: 'Change the category/game of the Twitch stream',
     parameters: toolSchema,
     scopes: ['twitch@channel:manage:broadcast'],
     clientDetails: ({ twitchCategory }) => ({

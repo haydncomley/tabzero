@@ -10,8 +10,14 @@ export const useSpeechToText = ({
 }: {
 	hotkey?: keyof typeof HOTKEYS;
 }) => {
-	const { startRecording, stopRecording, isRecording, audioBlob, devices } =
-		useRecorder();
+	const {
+		startRecording,
+		stopRecording,
+		isRecording,
+		audioBlob,
+		devices,
+		audioUrl,
+	} = useRecorder();
 
 	const { transcribe, isTranscribing, transcription } = useTranscriber();
 
@@ -45,9 +51,11 @@ export const useSpeechToText = ({
 			return transcribe({ audio: audioBlob });
 		},
 		transcription,
+		audioUrl,
 		toggleRecording,
 		startRecording,
 		stopRecording,
+		isTranscribing,
 		isLoading,
 		devices,
 	};

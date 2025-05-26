@@ -11,7 +11,7 @@ const toolSchema = z.object({
 
 export const twitchStreamChangeTitle = {
     name: 'twitchStreamChangeTitle',
-    description: 'Change the title of the stream',
+    description: 'Change the title of the Twitch stream',
     parameters: toolSchema,
     scopes: ['twitch@channel:manage:broadcast'],
     clientDetails: ({ title }) => ({
