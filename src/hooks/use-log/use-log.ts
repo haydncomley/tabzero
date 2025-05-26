@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
 
 import { useAuth } from '../use-auth';
-import { useSharedSnapshot } from '../use-snapshot';
+import { useCollectionSnapshot } from '../use-snapshot';
 import type { tabzeroToolAction } from '../use-tool-resolver/lib/types';
 
 export const useLog = () => {
 	const { details } = useAuth();
-	const log = useSharedSnapshot<tabzeroToolAction>(
+	const log = useCollectionSnapshot<tabzeroToolAction>(
 		details ? `users/${details.uid}/log` : undefined,
 	);
 

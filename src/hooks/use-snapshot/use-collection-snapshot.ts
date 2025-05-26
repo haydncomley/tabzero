@@ -1,3 +1,4 @@
+import type { QueryConstraint } from 'firebase/firestore';
 import { collection, onSnapshot, query } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 
@@ -5,7 +6,10 @@ import { firestore } from '../../main';
 
 const listeners = new Map();
 
-export const useSharedSnapshot = <T>(path?: string) => {
+export const useCollectionSnapshot = <T>(
+	path?: string,
+	...queryConstraints: QueryConstraint[]
+) => {
 	const [data, setData] = useState(() => {
 		const entry = listeners.get(path);
 		return entry ? entry.data : [];
@@ -19,7 +23,8 @@ export const useSharedSnapshot = <T>(path?: string) => {
 
 		if (!entry) {
 			// first subscriber: set up listener
-			const q = query(collection(firestore, path));
+			console.log(path, query);
+			const q = query(collection(firestore, path), ...queryConstraints);
 			const unsub = onSnapshot(q, (snap) => {
 				const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 				const e = listeners.get(path);

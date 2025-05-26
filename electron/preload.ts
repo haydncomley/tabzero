@@ -1,4 +1,5 @@
 import { ipcRenderer, contextBridge } from 'electron';
+import type { StoreType } from './lib/store-handler';
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld('ipcRenderer', {
@@ -28,5 +29,11 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
 	},
 	registerHotkey(options: { name: string; keys: string }) {
 		return ipcRenderer.invoke('register-hotkey', options);
+	},
+	getSetting(key: keyof StoreType) {
+		return ipcRenderer.invoke('get-setting', key);
+	},
+	setSetting(key: keyof StoreType, value: StoreType[typeof key]) {
+		return ipcRenderer.invoke('set-setting', key, value);
 	},
 });

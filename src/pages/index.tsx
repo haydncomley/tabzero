@@ -17,9 +17,12 @@ export default function Page() {
 
 	return (
 		<main className="from-brand to-brand-glint flex h-full w-full flex-col items-center justify-center gap-5 bg-gradient-to-tr">
-			<Logo className="fixed bottom-0 left-0 aspect-square h-[65vh] w-[65vh]" />
+			<Logo
+				variant="on-brand"
+				className="fixed bottom-0 left-0 aspect-square h-[65vh] w-[65vh]"
+			/>
 
-			<div className="flex flex-col">
+			<div className="text-brand-foreground flex flex-col">
 				<h1 className="relative text-4xl font-bold">
 					tabzero
 					<span className="absolute top-0 text-xs font-normal">

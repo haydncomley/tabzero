@@ -1,15 +1,16 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { FieldValue } from 'firebase-admin/firestore';
-import { auth, CONFIG, firestore } from '../config';
+import { auth, firestore, twitchClientId, twitchClientSecret, twitchRedirectUri } from '../config';
 import { TOOLS } from './tools';
 
-export const authTwitch = onCall(() => {
+
+export const authTwitch = onCall({ secrets: [twitchClientId, twitchClientSecret, twitchRedirectUri] }, () => {
 	const scopes = TOOLS.map((tool) => tool.scopes).flat().filter((scope) => scope.startsWith('twitch')).map((scope) => scope.replace('twitch@', '')).join(' ');
 
 	const url = [
 		'https://id.twitch.tv/oauth2/authorize',
-		`?client_id=${CONFIG.twitch.client_id}`,
-		`&redirect_uri=${encodeURIComponent(CONFIG.twitch.redirect_uri)}`,
+		`?client_id=${twitchClientId.value()}`,
+		`&redirect_uri=${encodeURIComponent(twitchRedirectUri.value())}`,
 		'&response_type=code',
 		`&scope=${scopes}`,
 	].join('');
@@ -17,7 +18,7 @@ export const authTwitch = onCall(() => {
 	return { url };
 });
 
-export const authTwitchCallback = onCall(async (request) => {
+export const authTwitchCallback = onCall({ secrets: [twitchClientId, twitchClientSecret, twitchRedirectUri] }, async (request) => {
 	try {
 		const { code } = request.data as { code: string };
 
@@ -27,11 +28,11 @@ export const authTwitchCallback = onCall(async (request) => {
 
 		const url = [
 			'https://id.twitch.tv/oauth2/token',
-			`?client_id=${CONFIG.twitch.client_id}`,
-			`&client_secret=${CONFIG.twitch.client_secret}`,
+			`?client_id=${twitchClientId.value()}`,
+			`&client_secret=${twitchClientSecret.value()}`,
 			`&code=${code}`,
 			'&grant_type=authorization_code',
-			`&redirect_uri=${CONFIG.twitch.redirect_uri}`,
+			`&redirect_uri=${twitchRedirectUri.value()}`,
 		].join('');
 		
 
@@ -42,7 +43,7 @@ export const authTwitchCallback = onCall(async (request) => {
 
 		const userResp = await fetch('https://api.twitch.tv/helix/users', {
 			headers: {
-				'Client-ID': CONFIG.twitch.client_id,
+				'Client-ID': twitchClientId.value(),
 				Authorization: `Bearer ${access_token}`,
 			},
 		});

@@ -6,11 +6,11 @@ declare global {
 		ipcRenderer: {
 			on<T>(
 				channel: string,
-				listener: (event: Electron.IpcRendererEvent, ...args: T[]) => void,
+				listener: (event: Electron.IpcRendererEvent, ...args: T) => void,
 			): Electron.IpcRenderer;
 			off(
 				channel: string,
-				listener: (event: Electron.IpcRendererEvent, ...args: any[]) => void,
+				listener: (event: Electron.IpcRendererEvent, ...args: any) => void,
 			): Electron.IpcRenderer;
 			send(channel: string, ...args: any[]): void;
 			invoke<T>(channel: string, ...args: any[]): Promise<T>;
@@ -19,6 +19,11 @@ declare global {
 				name: string;
 				keys: string;
 			}) => Promise<boolean>;
+			getSetting: <T extends keyof StoreType>(key: T) => Promise<StoreType[T]>;
+			setSetting: <T extends keyof StoreType>(
+				key: T,
+				value: StoreType[T],
+			) => Promise<void>;
 		};
 	}
 }

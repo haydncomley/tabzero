@@ -1,14 +1,25 @@
-import { LogOut, TicketPlus, TicketX } from 'lucide-react';
+import { LogOut, Moon, Sun, TicketPlus, TicketX } from 'lucide-react';
 
 import { useAuth } from '~/hooks/use-auth';
+import { useSetting } from '~/hooks/use-setting';
 
 import { version } from '../../../package.json';
 import { Button } from '../button';
 import { Logo } from '../logo';
 
 export const Navbar = () => {
-	const { details, logout, subscribe, cancel, isCancelling, apiVersion } =
-		useAuth();
+	const [darkMode, setDarkMode] = useSetting('darkMode');
+	const {
+		details,
+		logout,
+		subscribe,
+		isSubscribing,
+		cancel,
+		isCancelling,
+		apiVersion,
+		resume,
+		isResuming,
+	} = useAuth();
 
 	return (
 		<nav className="flex w-full items-center justify-between border-b p-3">
@@ -23,6 +34,18 @@ export const Navbar = () => {
 			</div>
 
 			<div className="flex items-center gap-3">
+				<Button
+					onClick={() => setDarkMode(!darkMode)}
+					variant="secondary"
+				>
+					{!darkMode ? (
+						<Sun className="h-4 w-4"></Sun>
+					) : (
+						<Moon className="h-4 w-4"></Moon>
+					)}
+					{!darkMode ? 'Light Mode' : 'Dark Mode'}
+				</Button>
+
 				{details?.isSubscribed && !details.isCancelling ? (
 					<Button
 						onClick={() => cancel()}
@@ -33,7 +56,10 @@ export const Navbar = () => {
 						Unsubscribe
 					</Button>
 				) : (
-					<Button onClick={() => subscribe()}>
+					<Button
+						onClick={() => (details?.isCancelling ? resume() : subscribe())}
+						loading={details?.isCancelling ? isResuming : isSubscribing}
+					>
 						<TicketPlus className="h-4 w-4"></TicketPlus>
 						{details?.isCancelling ? 'Re-subscribe' : 'Subscribe'}
 					</Button>

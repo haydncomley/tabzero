@@ -1,9 +1,9 @@
 import OpenAI from 'openai';
-import { CONFIG } from '../config';
+import { openaiKey } from '../config';
 
 export const getOpenAI = () => {
     const openai = new OpenAI({
-        apiKey: CONFIG.openai.key,
+        apiKey: openaiKey.value(),
     });
 
     return openai;

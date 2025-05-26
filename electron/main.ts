@@ -1,5 +1,5 @@
 import { app, BrowserWindow } from 'electron';
-import { updateElectronApp } from 'update-electron-app';
+import { updateElectronApp, UpdateSourceType } from 'update-electron-app';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -10,6 +10,7 @@ import {
 	PROTOCOL,
 } from './lib/auth-redirect-handler';
 import { initHotkeyHandler } from './lib/hotkey-handler';
+import { initStoreHandler } from './lib/store-handler';
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -46,7 +47,6 @@ function createWindow() {
 		icon: path.join(process.env.VITE_PUBLIC, 'icon.png'),
 		webPreferences: {
 			preload: path.join(__dirname, 'preload.mjs'),
-			devTools: true,
 			webSecurity: false,
 		},
 		autoHideMenuBar: true,
@@ -86,6 +86,7 @@ app.on('activate', () => {
 	}
 });
 
+initStoreHandler();
 initLinkHandler();
 
 if (!app.requestSingleInstanceLock()) {

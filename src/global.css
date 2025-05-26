@@ -2,10 +2,12 @@
 
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-	--color-background: #20201a;
-	--color-foreground: #fafafa;
-	--color-outline: #3d3d3d;
+	--color-background: #fafafa;
+	--color-foreground: #20201a;
+	--color-outline: #e2e2e2;
 
 	--color-brand: #606dff;
 	--color-brand-glint: #939cff;
@@ -19,14 +21,14 @@
 }
 
 /* Always dark mode for now, will do themes later */
-/* @layer base {
+@layer base {
 	@variant dark {
-		:root {
-			--color-background: #00ff00;
-			--color-foreground: #0000ff;
-		}
+		--color-background: #20201a;
+		--color-foreground: #fafafa;
+		--color-outline: #3d3d3d;
+		color-scheme: dark;
 	}
-} */
+}
 
 @layer base {
 	* {

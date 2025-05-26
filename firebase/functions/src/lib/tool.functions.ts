@@ -1,9 +1,9 @@
 import { HttpsError, onCall } from 'firebase-functions/https';
 import { TOOLS } from './tools';
-import { CONFIG, firestore } from '../config';
+import { firestore, openaiKey, twitchClientId, twitchClientSecret } from '../config';
 import { tabzeroToolAction, tabzeroUser } from './types';
 
-export const tool = onCall(async (request) => {
+export const tool = onCall({ secrets: [twitchClientId, twitchClientSecret, openaiKey] }, async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'User must be authenticated');
 
     const { action } = request.data as { action: tabzeroToolAction };
@@ -16,8 +16,8 @@ export const tool = onCall(async (request) => {
     if (user.providers.twitch.expires_in < Date.now()) {
         const url = [
 			'https://id.twitch.tv/oauth2/token',
-			`?client_id=${CONFIG.twitch.client_id}`,
-			`&client_secret=${CONFIG.twitch.client_secret}`,
+			`?client_id=${twitchClientId.value()}`,
+			`&client_secret=${twitchClientSecret.value()}`,
 			`&refresh_token=${user.providers[user.provider].refresh_token}`,
 			'&grant_type=refresh_token'
 		].join('');

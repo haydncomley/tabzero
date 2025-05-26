@@ -2,8 +2,8 @@ import { z } from "zod";
 import { tabzeroTool } from "../../types";
 import { ApiClient } from "@twurple/api";
 import { StaticAuthProvider } from "@twurple/auth";
-import { CONFIG } from "../../../config";
 import { HttpsError } from "firebase-functions/https";
+import { twitchClientId } from "../../../config";
 
 const toolSchema = z.object({
     title: z.string(),
@@ -19,7 +19,7 @@ export const twitchStreamChangeTitle = {
         context: `"${title}"`
     }),
     function: async ({ title, user }) => {
-        const provider = new StaticAuthProvider(CONFIG.twitch.client_id, user.providers[user.provider].access_token);
+        const provider = new StaticAuthProvider(twitchClientId.value(), user.providers[user.provider].access_token);
         const api = new ApiClient({ authProvider: provider });
         
         const { userId } = await api.getTokenInfo();

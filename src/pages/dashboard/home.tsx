@@ -1,18 +1,26 @@
 import classNames from 'classnames';
-import { AudioLines, Check, Loader2, X } from 'lucide-react';
-import { useEffect } from 'react';
+import { CircleFadingArrowUp, Loader2 } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
 
-import { useAudioPlayer } from '~/hooks/use-audio-player';
+import { Button } from '~/components/button';
+import { EventLog } from '~/components/event-log';
+import { useAuth } from '~/hooks/use-auth';
 import { useLog } from '~/hooks/use-log';
 import { useSpeechToText } from '~/hooks/use-speech-to-text';
 import { useToolResolver } from '~/hooks/use-tool-resolver';
 
 export default function Page() {
+	const { subscribe, isSubscribing, details } = useAuth();
 	const { log } = useLog();
-	const { transcribe, audioUrl, transcription, isLoading, isTranscribing } =
-		useSpeechToText({});
+	const {
+		transcribe,
+		audioUrl,
+		transcription,
+		isLoading,
+		isTranscribing,
+		state,
+	} = useSpeechToText({});
 	const { resolveTools, runTools } = useToolResolver();
-	const { speak } = useAudioPlayer();
 
 	useEffect(() => {
 		if (!audioUrl) return;
@@ -25,69 +33,34 @@ export default function Page() {
 		});
 	}, [audioUrl]);
 
-	// const isLastTranscriptionNew = useMemo(() => {
-	// 	if (!transcription) return false;
-	// 	if (!log[0].text) return false;
-	// 	return transcription !== log[0].text;
-	// }, [transcription, log[0]?.text]);
+	const isLastTranscriptionNew = useMemo(() => {
+		if (!transcription) return false;
+		if (!log[0].text) return false;
+		return transcription !== log[0].text;
+	}, [transcription, log[0]?.text]);
 
 	return (
-		<main>
+		<main className="relative">
 			<div className="flex h-full w-full flex-col gap-4 overflow-y-auto p-4">
+				{isLoading || isLastTranscriptionNew ? (
+					<EventLog
+						date="Processing..."
+						text={
+							state === 'recording'
+								? 'Listening...'
+								: state === 'done' && transcription
+									? transcription
+									: 'Working...'
+						}
+					></EventLog>
+				) : null}
 				{log.map((logItem) => (
-					<div
+					<EventLog
 						key={logItem.id}
-						className="flex flex-col gap-4 border-b pb-4"
-					>
-						<div className="flex flex-col">
-							<p className="text-xs opacity-50">
-								{logItem.timestamp.toDate().toLocaleTimeString()}
-							</p>
-							<p className="text-sm">{logItem.text}</p>
-						</div>
-
-						{logItem.tools.length ? (
-							<div className="flex flex-wrap gap-2 overflow-auto">
-								{logItem.tools.map((tool) => (
-									<div
-										key={tool.id}
-										className={classNames(
-											'flex shrink-0 items-center gap-3 rounded-xl px-3 py-2',
-											{
-												'bg-outline/25': tool.status !== 'pending',
-												'bg-brand/25': tool.status === 'pending',
-											},
-										)}
-									>
-										{tool.status === 'pending' ? (
-											<Loader2 className="h-5 w-5 animate-spin"></Loader2>
-										) : tool.status === 'success' ? (
-											<Check className="h-5 w-5"></Check>
-										) : (
-											<X className="h-5 w-5"></X>
-										)}
-										<div className="flex flex-col">
-											<p className="text-xs font-semibold">{tool.name}</p>
-											<p
-												className="max-w-64 overflow-hidden text-xs overflow-ellipsis whitespace-nowrap opacity-50"
-												title={tool.context}
-											>
-												{tool.context}
-											</p>
-										</div>
-										{tool.tts ? (
-											<button
-												className="bg-brand border-brand-glint text-brand-foreground hover:bg-brand-glint cursor-pointer rounded-full border p-2 transition-all duration-75"
-												onClick={() => speak({ text: tool.tts! })}
-											>
-												<AudioLines className="h-4 w-4"></AudioLines>
-											</button>
-										) : null}
-									</div>
-								))}
-							</div>
-						) : null}
-					</div>
+						date={logItem.timestamp.toDate().toLocaleTimeString()}
+						text={logItem.text}
+						tools={logItem.tools}
+					></EventLog>
 				))}
 			</div>
 
@@ -102,10 +75,36 @@ export default function Page() {
 				<div className="bg-brand border-brand-glint text-brand-foreground flex items-center gap-2 rounded-xl border p-2">
 					<Loader2 className="h-4 w-4 animate-spin"></Loader2>
 					<p className="text-sm">
-						{isTranscribing || !transcription ? 'Recording...' : 'Working...'}
+						{state === 'recording' ? 'Listening...' : 'Working...'}
 					</p>
 				</div>
 			</div>
+
+			{!details?.isSubscribed ? (
+				<div className="bg-background/50 absolute top-0 left-0 flex h-full w-full flex-col items-center justify-center gap-6 backdrop-blur-xs">
+					<h1 className="text-center text-xl">
+						Welcome to <b className="font-bold">tabzero</b> early access.
+						<br />
+						<small className="text-sm">
+							AI Stream Assistant - Never tab out again.
+						</small>
+					</h1>
+					<Button
+						onClick={() => subscribe()}
+						loading={isSubscribing}
+					>
+						<CircleFadingArrowUp></CircleFadingArrowUp>
+						Subscribe Now
+					</Button>
+
+					<p className="max-w-lg text-center text-sm opacity-50">
+						You can cancel at any time, no questions asked.
+						<br />
+						You'll also keep access to all features until your subscription
+						ends.
+					</p>
+				</div>
+			) : null}
 		</main>
 	);
 }

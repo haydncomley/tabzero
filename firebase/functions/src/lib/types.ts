@@ -24,7 +24,7 @@ export interface tabzeroUser {
     timestamp_created: Timestamp,
     stripe_customer_id?: string,
     stripe_subscription_id?: string,
-    stripe_subscription_status?: boolean,
+    stripe_subscription_status?: 'active' | 'active-canceled' | 'inactive',
 }
 
 export type tabzeroTool<T extends z.ZodSchema, K extends string = string> = {

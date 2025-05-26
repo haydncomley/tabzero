@@ -1,10 +1,10 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { signOut, signInWithCustomToken } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 
-import { auth, firestore, functions, queryClient } from '../../main';
-import { userConverter } from './lib/converters';
+import { auth, functions } from '../../main';
+import { useDocSnapshot } from '../use-snapshot';
+import type { tabzeroUser } from './lib/types';
 
 export const useAuth = () => {
 	const { data: ready } = useQuery({
@@ -22,33 +22,9 @@ export const useAuth = () => {
 		initialData: auth.currentUser,
 	});
 
-	const { data: userDetails } = useQuery({
-		queryKey: ['user', user?.uid],
-		queryFn: async () => {
-			if (!user?.uid) return null;
-
-			const userRef = doc(firestore, 'users', user.uid).withConverter(
-				userConverter,
-			);
-			const userSnap = await getDoc(userRef);
-			return userSnap.exists() ? userSnap.data() : null;
-		},
-		initialData: null,
-		enabled: !!user?.uid,
-	});
-
-	// const { data: apiVersion } = useQuery({
-	// 	queryKey: ['apiVersion'],
-	// 	queryFn: async () => {
-	// 		const version = await httpsCallable<void, { version: string }>(
-	// 			functions,
-	// 			'metaVersion',
-	// 		);
-	// 		return (await version()).data.version;
-	// 	},
-	// 	initialData: null,
-	// 	enabled: !!user?.uid,
-	// });
+	const userDetails = useDocSnapshot<tabzeroUser>(
+		user?.uid ? `users/${user.uid}` : undefined,
+	);
 
 	const { mutateAsync: login, isPending: isLoggingIn } = useMutation({
 		mutationFn: () =>
@@ -61,10 +37,14 @@ export const useAuth = () => {
 
 				window.ipcRenderer.openExternal(data.url);
 
-				window.ipcRenderer.on<{
-					code: string;
-					scope: string;
-				}>('auth', async (_e, { code }) => {
+				window.ipcRenderer.on<
+					[
+						{
+							code: string;
+							scope: string;
+						},
+					]
+				>('auth', async (_e, { code }) => {
 					const authTwitchCallback = httpsCallable<
 						{ code: string },
 						{ token: string; twitch: any }
@@ -98,6 +78,7 @@ export const useAuth = () => {
 			return data;
 		},
 	});
+
 	const { mutateAsync: cancel, isPending: isCancelling } = useMutation({
 		mutationFn: async () => {
 			const stripeCancel = httpsCallable<void, { canceled: boolean }>(
@@ -105,7 +86,22 @@ export const useAuth = () => {
 				'stripeCancel',
 			);
 			await stripeCancel();
-			queryClient.invalidateQueries({ queryKey: ['user'] });
+		},
+	});
+
+	const { mutateAsync: resume, isPending: isResuming } = useMutation({
+		mutationFn: async () => {
+			const stripeResume = httpsCallable<void, { canceled: boolean }>(
+				functions,
+				'stripeResume',
+			);
+
+			try {
+				const { data } = await stripeResume();
+				return data;
+			} catch {
+				subscribe();
+			}
 		},
 	});
 
@@ -137,5 +133,7 @@ export const useAuth = () => {
 		cancel,
 		isCancelling,
 		apiVersion: '0.0.1',
+		resume,
+		isResuming,
 	};
 };

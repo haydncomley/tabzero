@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 
+import { useSetting } from '../use-setting';
+
 export const useRecorder = () => {
+	const [deviceId] = useSetting('deviceId');
 	const [isRecording, setIsRecording] = useState(false);
 	const [audioId, setAudioId] = useState<string | null>(null);
 	const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
@@ -24,7 +27,7 @@ export const useRecorder = () => {
 		const startRecording = async () => {
 			setAudioId(crypto.randomUUID());
 			const stream = await navigator.mediaDevices.getUserMedia({
-				audio: true,
+				audio: deviceId ? { deviceId: deviceId } : true,
 			});
 
 			mediaRecorder = new MediaRecorder(stream);
