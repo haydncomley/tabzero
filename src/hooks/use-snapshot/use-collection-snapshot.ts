@@ -17,13 +17,10 @@ export const useCollectionSnapshot = <T>(
 
 	useEffect(() => {
 		if (!path) return;
-		console.log('path', path);
-
 		let entry = listeners.get(path);
 
 		if (!entry) {
 			// first subscriber: set up listener
-			console.log(path, query);
 			const q = query(collection(firestore, path), ...queryConstraints);
 			const unsub = onSnapshot(q, (snap) => {
 				const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));

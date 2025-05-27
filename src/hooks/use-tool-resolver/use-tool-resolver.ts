@@ -61,9 +61,8 @@ export const useToolResolver = () => {
 				action: options.action,
 			});
 
-			data.forEach((tool) => {
-				if (tool.result?.tts) speak({ text: tool.result.tts });
-			});
+			const firstWithTTS = data.find((tool) => tool.result?.tts);
+			if (firstWithTTS) speak({ text: firstWithTTS.result?.tts! });
 
 			return data;
 		},

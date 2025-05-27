@@ -1,10 +1,21 @@
+import classNames from 'classnames';
 import { ChevronsUpDown } from 'lucide-react';
 
+import { useHotkey } from '~/hooks/use-hotkey';
 import { useRecorder } from '~/hooks/use-recorder';
 import { useSetting } from '~/hooks/use-setting';
 
+const hotkeyToString = (hotkey: string | null) =>
+	hotkey
+		?.replace(/([A-Z])/g, ' $1')
+		.replace(/\+/g, ' + ')
+		.trim();
+
+const stringToHotkey = (hotkey: string) => hotkey.replace(/ /g, '');
+
 export const SettingsBar = () => {
 	const [deviceId, setDeviceId] = useSetting('deviceId');
+	const { keys, rebindSuccess, remap } = useHotkey('toggleRecording');
 	const { devices } = useRecorder();
 
 	return (
@@ -34,7 +45,14 @@ export const SettingsBar = () => {
 			<div className="flex items-center gap-4">
 				<div>
 					<p className="text-xs opacity-50">Hotkey</p>
-					<p className="text-sm font-medium">Command or Control + Shift + B</p>
+					<input
+						type="text"
+						className={classNames('w-sm appearance-none text-sm font-medium', {
+							'text-red-500': !rebindSuccess,
+						})}
+						defaultValue={hotkeyToString(keys)}
+						onChange={(e) => remap(stringToHotkey(e.target.value))}
+					/>
 				</div>
 			</div>
 		</div>

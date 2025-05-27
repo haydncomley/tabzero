@@ -1,16 +1,13 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
+import { useAudioPlayer } from '../use-audio-player';
+import { SOUND_OFF, SOUND_ON } from '../use-audio-player/lib/constants';
 import { useDebounce } from '../use-debounce';
-import { useHotkey } from '../use-hotkey';
-import type { HOTKEYS } from '../use-hotkey/lib/constants';
 import { useRecorder } from '../use-recorder';
 import { useTranscriber } from '../use-transcription';
 
-export const useSpeechToText = ({
-	hotkey = 'toggleRecording',
-}: {
-	hotkey?: keyof typeof HOTKEYS;
-}) => {
+export const useSpeechToText = () => {
+	const { play } = useAudioPlayer();
 	const {
 		startRecording,
 		stopRecording,
@@ -23,14 +20,14 @@ export const useSpeechToText = ({
 	const isRecordingDebounced = useDebounce(isRecording, 150);
 	const { transcribe, isTranscribing, transcription } = useTranscriber();
 
-	const toggleRecording = useMemo(() => {
-		if (!isRecording) return startRecording;
-		else return stopRecording;
-	}, [isRecording]);
-
-	useHotkey(hotkey, () => {
-		if (!isRecording) startRecording();
-		else stopRecording();
+	const toggleRecording = useCallback(() => {
+		if (!isRecording) {
+			startRecording();
+			play(SOUND_ON);
+		} else {
+			stopRecording();
+			play(SOUND_OFF);
+		}
 	}, [isRecording]);
 
 	const state = useMemo<'recording' | 'transcribing' | 'idle' | 'done'>(() => {

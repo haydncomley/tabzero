@@ -1,0 +1,13 @@
+@keyframes load {
+	0% {
+		width: 0%;
+	}
+	100% {
+		width: 100%;
+	}
+}
+
+.buttonProgress {
+	animation: load 1s linear infinite;
+	mix-blend-mode: soft-light;
+}

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { limit, orderBy } from 'firebase/firestore';
 
 import { useAuth } from '../use-auth';
 import { useCollectionSnapshot } from '../use-snapshot';
@@ -8,16 +8,9 @@ export const useLog = () => {
 	const { details } = useAuth();
 	const log = useCollectionSnapshot<tabzeroToolAction>(
 		details ? `users/${details.uid}/log` : undefined,
+		orderBy('timestamp', 'desc'),
+		limit(25),
 	);
 
-	const logSorted = useMemo(
-		() =>
-			(log ?? []).sort(
-				(a, b) =>
-					b.timestamp.toDate().getTime() - a.timestamp.toDate().getTime(),
-			),
-		[log],
-	);
-
-	return { log: logSorted };
+	return { log };
 };

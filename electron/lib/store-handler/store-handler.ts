@@ -5,9 +5,11 @@ const store = new Store<{
 	darkMode: boolean;
 	deviceId?: string;
 	lastApiVersion?: string;
+	hotkeys: Record<string, string>;
 }>({
 	defaults: {
 		darkMode: false,
+		hotkeys: {},
 	},
 });
 

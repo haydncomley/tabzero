@@ -105,22 +105,6 @@ export const useAuth = () => {
 		},
 	});
 
-	const { data: toolList } = useQuery({
-		queryKey: ['tools'],
-		queryFn: async () => {
-			const tools = httpsCallable<
-				{ test: string },
-				{
-					tools: { name: string; description: string }[];
-				}
-			>(functions, 'toolList');
-			const { data } = await tools({ test: 'test' });
-			return data.tools ?? [];
-		},
-		initialData: [],
-		enabled: !!user,
-	});
-
 	return {
 		login,
 		isLoggingIn,
@@ -150,6 +134,5 @@ export const useAuth = () => {
 		isCancelling,
 		resume,
 		isResuming,
-		toolList,
 	};
 };

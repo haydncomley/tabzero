@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { HOTKEYS } from './lib/constants';
+import { useSetting } from '../use-setting';
+import type { HOTKEYS } from './lib/constants';
 
 const HOTKEY_REBINDS: Record<string, string> = {};
 
@@ -10,7 +11,7 @@ export const useHotkey = (
 	deps?: React.DependencyList,
 ) => {
 	const mounted = useRef(false);
-	const [keys, setKeys] = useState(HOTKEY_REBINDS[name] ?? HOTKEYS[name].keys);
+	const [hotkeys, setHotkeys] = useSetting('hotkeys', {});
 	const [rebindSuccess, setRebindSuccess] = useState(true);
 
 	useEffect(() => {
@@ -20,10 +21,10 @@ export const useHotkey = (
 		}
 
 		if (!HOTKEY_REBINDS[name]) {
-			HOTKEY_REBINDS[name] = keys;
+			HOTKEY_REBINDS[name] = hotkeys[name];
 			(window as any).ipcRenderer.invoke('register-hotkey', {
 				name,
-				keys,
+				keys: hotkeys[name],
 			});
 		}
 
@@ -32,7 +33,7 @@ export const useHotkey = (
 		return () => {
 			if (callback) window.ipcRenderer.off('hotkey', callback);
 		};
-	}, [name, keys, ...(deps ?? [])]);
+	}, [name, hotkeys[name], ...(deps ?? [])]);
 
 	const remap = async (keys: string) => {
 		const success = await (window as any).ipcRenderer.invoke(
@@ -51,12 +52,12 @@ export const useHotkey = (
 		setRebindSuccess(true);
 		mounted.current = false;
 		HOTKEY_REBINDS[name] = keys;
-		setKeys(keys);
+		setHotkeys({ ...hotkeys, [name]: keys });
 	};
 
 	return {
 		remap,
-		keys,
+		keys: hotkeys[name],
 		rebindSuccess,
 	};
 };

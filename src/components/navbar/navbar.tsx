@@ -1,6 +1,4 @@
-import classNames from 'classnames';
-import { LogOut, Moon, Sun, TicketPlus, TicketX } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Loader2, LogOut, Moon, Sun, TicketPlus, TicketX } from 'lucide-react';
 
 import { useAuth } from '~/hooks/use-auth';
 import { useMeta } from '~/hooks/use-meta';
@@ -23,15 +21,6 @@ export const Navbar = () => {
 		isResuming,
 	} = useAuth();
 	const { version: apiVersion } = useMeta();
-	const [lastApiVersion, setLastApiVersion] = useSetting('lastApiVersion');
-	const [isNewVersion, setIsNewVersion] = useState(false);
-
-	useEffect(() => {
-		if (lastApiVersion !== apiVersion && apiVersion) {
-			setLastApiVersion(apiVersion);
-			setIsNewVersion(true);
-		}
-	}, [apiVersion]);
 
 	return (
 		<nav className="flex w-full items-center justify-between border-b p-3">
@@ -39,16 +28,13 @@ export const Navbar = () => {
 				<Logo className="h-10 w-10"></Logo>
 				<div className="ml-2 flex flex-col">
 					<h1 className="text-xl font-bold">tabzero</h1>
-					<p className="text-foreground/50 text-xs">
-						Client v{version} -{' '}
-						<span
-							className={classNames({
-								'text-brand': isNewVersion,
-							})}
-						>
-							API v{apiVersion}
-							{isNewVersion ? ' (UPDATED)' : ''}
-						</span>
+					<p className="text-foreground/50 flex items-center gap-2 text-xs">
+						Client v{version}
+						{apiVersion ? (
+							` - API v${apiVersion}`
+						) : (
+							<Loader2 className="h-3 w-3 animate-spin"></Loader2>
+						)}
 					</p>
 				</div>
 			</div>
@@ -57,13 +43,13 @@ export const Navbar = () => {
 				<Button
 					onClick={() => setDarkMode(!darkMode)}
 					variant="secondary"
+					size="small"
 				>
 					{!darkMode ? (
 						<Sun className="h-4 w-4"></Sun>
 					) : (
 						<Moon className="h-4 w-4"></Moon>
 					)}
-					{!darkMode ? 'Light Mode' : 'Dark Mode'}
 				</Button>
 
 				{details?.isSubscribed && !details.isCancelling ? (
