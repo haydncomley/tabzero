@@ -19,9 +19,9 @@ export const SettingsBar = () => {
 	const { devices } = useRecorder();
 
 	return (
-		<div className="bg-outline flex w-full flex-wrap items-center gap-4 border-b p-3">
-			<div className="flex items-center gap-4">
-				<div className="flex flex-col">
+		<div className="bg-outline flex w-full items-center gap-4 border-b p-3">
+			<div className="flex max-w-[25rem] basis-1/2 items-center gap-4 overflow-hidden">
+				<div className="flex w-full flex-col overflow-hidden">
 					<label className="text-xs opacity-50">Microphone</label>
 					<select
 						value={deviceId}
@@ -39,17 +39,20 @@ export const SettingsBar = () => {
 						))}
 					</select>
 				</div>
-				<ChevronsUpDown className="h-4 w-4"></ChevronsUpDown>
+				<ChevronsUpDown className="h-4 w-4 shrink-0"></ChevronsUpDown>
 			</div>
 
-			<div className="flex items-center gap-4">
-				<div>
+			<div className="flex max-w-[25rem] basis-1/2 items-center gap-4">
+				<div className="w-full">
 					<p className="text-xs opacity-50">Hotkey</p>
 					<input
 						type="text"
-						className={classNames('w-sm appearance-none text-sm font-medium', {
-							'text-red-500': !rebindSuccess,
-						})}
+						className={classNames(
+							'w-full appearance-none text-sm font-medium',
+							{
+								'text-red-500': !rebindSuccess,
+							},
+						)}
 						defaultValue={hotkeyToString(keys)}
 						onChange={(e) => remap(stringToHotkey(e.target.value))}
 					/>

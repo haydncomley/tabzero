@@ -35,4 +35,12 @@ export const initHotkeyHandler = (window: BrowserWindow) => {
 			return true;
 		},
 	);
+
+	window.on('close', () => {
+		Object.values(hotkeys).forEach((keys) => {
+			globalShortcut.unregister(keys);
+		});
+
+		ipcMain.removeHandler('register-hotkey');
+	});
 };

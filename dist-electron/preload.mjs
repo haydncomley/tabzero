@@ -1,1 +1,37 @@
-"use strict";const r=require("electron");r.contextBridge.exposeInMainWorld("ipcRenderer",{on(...e){const[n,t]=e;return r.ipcRenderer.on(n,(i,...o)=>t(i,...o))},off(...e){const[n,...t]=e;return r.ipcRenderer.off(n,...t)},send(...e){const[n,...t]=e;return r.ipcRenderer.send(n,...t)},invoke(...e){const[n,...t]=e;return r.ipcRenderer.invoke(n,...t)},openExternal(e){return r.ipcRenderer.invoke("open-external",e)},registerHotkey(e){return r.ipcRenderer.invoke("register-hotkey",e)},getSetting(e){return r.ipcRenderer.invoke("get-setting",e)},setSetting(e,n){return r.ipcRenderer.invoke("set-setting",e,n)}});
+"use strict";
+const electron = require("electron");
+electron.contextBridge.exposeInMainWorld("ipcRenderer", {
+  on(...args) {
+    const [channel, listener] = args;
+    return electron.ipcRenderer.on(
+      channel,
+      (event, ...args2) => listener(event, ...args2)
+    );
+  },
+  off(...args) {
+    const [channel, ...omit] = args;
+    return electron.ipcRenderer.off(channel, ...omit);
+  },
+  send(...args) {
+    const [channel, ...omit] = args;
+    return electron.ipcRenderer.send(channel, ...omit);
+  },
+  invoke(...args) {
+    const [channel, ...omit] = args;
+    return electron.ipcRenderer.invoke(channel, ...omit);
+  },
+  // You can expose other APTs you need here.
+  // ...
+  openExternal(url) {
+    return electron.ipcRenderer.invoke("open-external", url);
+  },
+  registerHotkey(options) {
+    return electron.ipcRenderer.invoke("register-hotkey", options);
+  },
+  getSetting(key) {
+    return electron.ipcRenderer.invoke("get-setting", key);
+  },
+  setSetting(key, value) {
+    return electron.ipcRenderer.invoke("set-setting", key, value);
+  }
+});

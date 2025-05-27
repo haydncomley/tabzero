@@ -11,7 +11,9 @@ export const useHotkey = (
 	deps?: React.DependencyList,
 ) => {
 	const mounted = useRef(false);
-	const [hotkeys, setHotkeys] = useSetting('hotkeys', {});
+	const [hotkeys, setHotkeys] = useSetting('hotkeys', {
+		toggleRecording: 'CommandOrControl+Shift+[',
+	});
 	const [rebindSuccess, setRebindSuccess] = useState(true);
 
 	useEffect(() => {

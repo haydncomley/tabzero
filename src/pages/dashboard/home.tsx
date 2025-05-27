@@ -2,9 +2,9 @@ import classNames from 'classnames';
 import {
 	AudioLines,
 	CircleFadingArrowUp,
-	Info,
+	HelpCircle,
 	Loader2,
-	Send,
+	SendHorizonal,
 	Sparkles,
 	X,
 } from 'lucide-react';
@@ -29,6 +29,7 @@ export default function Page() {
 	const { resolveTools, runTools, isRunningTools, isResolvingTools } =
 		useToolResolver();
 	const [showInfo, setShowInfo] = useState(false);
+	const [prompt, setPrompt] = useState('');
 
 	const isRecordingDebounced = useDebounce(
 		state === 'recording',
@@ -38,6 +39,7 @@ export default function Page() {
 	useHotkey(
 		'toggleRecording',
 		() => {
+			setPrompt('');
 			if (recordButtonRef.current) recordButtonRef.current.click();
 		},
 		[!!recordButtonRef.current],
@@ -90,6 +92,13 @@ export default function Page() {
 						text={state === 'recording' ? 'Listening...' : 'Working...'}
 					></EventLog>
 				) : null}
+				{!log.length && !isLoadingResolver ? (
+					<EventLog
+						date="Nothing here just yet..."
+						isLoading
+						text="Try asking a question or typing a prompt down below 🚀"
+					></EventLog>
+				) : null}
 				{log.map((logItem) => (
 					<EventLog
 						key={logItem.id}
@@ -113,9 +122,9 @@ export default function Page() {
 					size="small"
 					onClick={() => setShowInfo(!showInfo)}
 					title="View Capabilities"
-					variant={showInfo ? 'primary' : 'secondary'}
+					variant="primary"
 				>
-					<Info className="h-4 w-4 shrink-0"></Info>
+					<HelpCircle className="h-4 w-4 shrink-0"></HelpCircle>
 				</Button>
 
 				<div
@@ -130,7 +139,7 @@ export default function Page() {
 					{isLoading ? (
 						<Loader2 className="h-4 w-4 shrink-0 animate-spin"></Loader2>
 					) : (
-						<Send className="h-4 w-4 shrink-0"></Send>
+						<Sparkles className="h-4 w-4 shrink-0"></Sparkles>
 					)}
 					{!isLoading ? (
 						<input
@@ -139,6 +148,8 @@ export default function Page() {
 							name="prompt"
 							id="prompt"
 							placeholder="Prompt..."
+							value={prompt}
+							onChange={(e) => setPrompt(e.currentTarget.value)}
 							className={classNames(
 								'placeholder:text-brand-foreground/50 appearance-none bg-transparent text-sm font-normal text-inherit transition-all duration-150 outline-none',
 								{
@@ -149,8 +160,9 @@ export default function Page() {
 							onKeyDown={(e) => {
 								if (e.key === 'Enter') {
 									e.preventDefault();
-									sendPrompt(e.currentTarget.value);
-									e.currentTarget.value = '';
+									sendPrompt(prompt).finally(() => {
+										setPrompt('');
+									});
 								}
 							}}
 						/>
@@ -163,20 +175,30 @@ export default function Page() {
 					<button
 						ref={recordButtonRef}
 						className={classNames(
-							'-mr-2 cursor-pointer rounded-full border p-1 transition-all duration-75',
+							'-mr-2 shrink-0 cursor-pointer rounded-full border p-1 transition-all duration-100',
 							{
 								'bg-brand-glint text-brand-foreground border-brand-glint/50 hover:scale-110':
 									state !== 'recording' && !isLoadingTools,
-								'bg-background text-foreground border-outline': isLoadingTools,
+								'scale-0 opacity-0': isLoadingTools,
 								'bg-brand text-brand-foreground border-brand-glint hover:scale-125':
 									state === 'recording',
 							},
 						)}
 						onClick={() => {
-							toggleRecording();
+							if (prompt.length) {
+								sendPrompt(prompt).finally(() => {
+									setPrompt('');
+								});
+							} else {
+								toggleRecording();
+							}
 						}}
 					>
-						<AudioLines className="h-4 w-4 text-inherit"></AudioLines>
+						{prompt.length ? (
+							<SendHorizonal className="h-4 w-4"></SendHorizonal>
+						) : (
+							<AudioLines className="h-4 w-4 text-inherit"></AudioLines>
+						)}
 					</button>
 				</div>
 			</div>

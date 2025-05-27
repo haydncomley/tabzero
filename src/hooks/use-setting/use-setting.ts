@@ -21,7 +21,8 @@ export const useSetting = <T extends keyof StoreType>(
 			changedKey: string,
 			newVal: StoreType[T],
 		) => {
-			if (changedKey === key) setValue(newVal);
+			if (changedKey === key)
+				setValue(newVal ?? (defaultValue as StoreType[T]));
 		};
 		window.ipcRenderer.on<[T, StoreType[T]]>('setting-changed', handler);
 
