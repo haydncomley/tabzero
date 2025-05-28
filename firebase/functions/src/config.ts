@@ -10,10 +10,13 @@ export const auth = getAuth(app);
 export const storage = getStorage(app);
 
 export const CONFIG = {
-	version: '0.1.0',
+	version: '0.1.1',
 };
 
 export const openaiKey = defineSecret('OPENAI_KEY');
+export const langfuseKey = defineSecret('LANGFUSE_KEY');
+export const langfusePublicKey = defineSecret('LANGFUSE_PUBLIC_KEY');
+export const langfuseHost = defineSecret('LANGFUSE_HOST');
 
 export const twitchClientId = defineSecret('TWITCH_CLIENT_ID');
 export const twitchClientSecret = defineSecret('TWITCH_CLIENT_SECRET');

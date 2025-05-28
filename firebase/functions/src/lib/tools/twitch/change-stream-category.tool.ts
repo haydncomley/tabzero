@@ -1,9 +1,7 @@
 import { z } from "zod";
 import { tabzeroTool } from "../../types";
-import { ApiClient } from "@twurple/api";
-import { StaticAuthProvider } from "@twurple/auth";
 import { HttpsError } from "firebase-functions/https";
-import { twitchClientId } from "../../../config";
+import { getTwitch } from "../../../vendor/twitch.vendor";
 
 const toolSchema = z.object({
     twitchCategory: z.string(),
@@ -21,33 +19,33 @@ export const twitchStreamChangeCategory = {
     }),
     // User
     infoName: 'Twitch: Change Category',
-    infoDescription: 'Change the category/game of your Twitch stream.',
+    infoDescription: 'Change the category/game of your stream.',
     // Action
     function: async ({ twitchCategory, user }) => {
-        const provider = new StaticAuthProvider(twitchClientId.value(), user.providers[user.provider].access_token);
-        const api = new ApiClient({ authProvider: provider });
+        const api = getTwitch(user);
         
         const { userId } = await api.getTokenInfo();
         
         if (!userId) throw new HttpsError('invalid-argument', 'User validation failed');
 
-        const games = await api.games.getGamesByNames([twitchCategory])
-
-        if (games.length === 0) {
-            return {
-                success: false,
-                message: `"${twitchCategory}" not found`,
-            }
-        };
-
         try {
+            const games = await api.games.getGamesByNames([twitchCategory])
+
+            if (games.length === 0) {
+                return {
+                    success: false,
+                    message: `"${twitchCategory}" not found`,
+                }
+            };
+
             await api.channels.updateChannelInfo(userId, {
                 gameId: games[0].id,
             })
+
             return { success: true }
         } catch (error) {
             console.error(error);
-            throw new HttpsError('internal', 'Failed to change stream category');
+            return { success: false, message: 'Failed to change category' }
         }
     }
 } as const satisfies tabzeroTool<typeof toolSchema>

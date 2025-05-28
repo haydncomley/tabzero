@@ -1,9 +1,9 @@
 import { HttpsError, onCall } from 'firebase-functions/https';
 import { TOOLS } from './tools';
-import { firestore, openaiKey, twitchClientId, twitchClientSecret } from '../config';
+import { firestore, langfuseHost, langfuseKey, langfusePublicKey, openaiKey, twitchClientId, twitchClientSecret } from '../config';
 import { tabzeroToolAction, tabzeroUser } from './types';
 
-export const tool = onCall({ secrets: [twitchClientId, twitchClientSecret, openaiKey] }, async (request) => {
+export const tool = onCall({ secrets: [twitchClientId, twitchClientSecret, openaiKey, langfuseKey, langfusePublicKey, langfuseHost] }, async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'User must be authenticated');
 
     const { action } = request.data as { action: tabzeroToolAction };
@@ -65,6 +65,10 @@ export const tool = onCall({ secrets: [twitchClientId, twitchClientSecret, opena
                 log.tools[toolIndex].status = result.result.success ? 'success' : 'error'
             } else {
                 log.tools[toolIndex].status = 'error'
+            }
+
+            if(result.result?.message) {
+                log.tools[toolIndex].context = result.result?.message;
             }
 
             if (result.result?.tts) {
