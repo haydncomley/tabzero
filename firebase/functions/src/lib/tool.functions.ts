@@ -1,9 +1,9 @@
 import { HttpsError, onCall } from 'firebase-functions/https';
 import { TOOLS } from './tools';
-import { firestore, langfuseHost, langfuseKey, langfusePublicKey, openaiKey, twitchClientId, twitchClientSecret } from '../config';
+import { firestore, langfuseHost, langfuseKey, langfusePublicKey, MAX_INSTANCES, MIN_INSTANCES, openaiKey, twitchClientId, twitchClientSecret } from '../config';
 import { tabzeroToolAction, tabzeroUser } from './types';
 
-export const tool = onCall({ secrets: [twitchClientId, twitchClientSecret, openaiKey, langfuseKey, langfusePublicKey, langfuseHost] }, async (request) => {
+export const tool = onCall({ secrets: [twitchClientId, twitchClientSecret, openaiKey, langfuseKey, langfusePublicKey, langfuseHost], minInstances: MIN_INSTANCES, maxInstances: MAX_INSTANCES }, async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'User must be authenticated');
 
     const { action } = request.data as { action: tabzeroToolAction };

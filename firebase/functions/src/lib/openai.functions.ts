@@ -8,10 +8,10 @@ import { ChatCompletionMessageToolCall } from 'openai/resources/index.mjs';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { TOOLS } from './tools';
-import { firestore, langfuseHost, langfuseKey, langfusePublicKey, openaiKey } from '../config';
+import { firestore, langfuseHost, langfuseKey, langfusePublicKey, MAX_INSTANCES, MIN_INSTANCES, openaiKey } from '../config';
 import { FieldValue } from 'firebase-admin/firestore';
 
-export const aiChat = onCall({ secrets: [openaiKey, langfuseKey, langfusePublicKey, langfuseHost] }, async (request) => {
+export const aiChat = onCall({ secrets: [openaiKey, langfuseKey, langfusePublicKey, langfuseHost], minInstances: MIN_INSTANCES, maxInstances: MAX_INSTANCES }, async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'User must be authenticated');
 
     const { prompt } = request.data;
@@ -30,7 +30,7 @@ export const aiChat = onCall({ secrets: [openaiKey, langfuseKey, langfusePublicK
 
 const getToolSchema = (schema: z.ZodSchema) => zodToJsonSchema(schema);
 
-export const aiTranscribe = onCall({ secrets: [openaiKey, langfuseKey, langfusePublicKey, langfuseHost] }, async (request) => {
+export const aiTranscribe = onCall({ secrets: [openaiKey, langfuseKey, langfusePublicKey, langfuseHost], minInstances: MIN_INSTANCES, maxInstances: MAX_INSTANCES }, async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'User must be authenticated');
 
     const { audio } = request.data;
@@ -56,7 +56,7 @@ export const aiTranscribe = onCall({ secrets: [openaiKey, langfuseKey, langfuseP
     }
 });
 
-export const aiSpeak = onCall({ secrets: [openaiKey, langfuseKey, langfusePublicKey, langfuseHost] }, async (request) => {
+export const aiSpeak = onCall({ secrets: [openaiKey, langfuseKey, langfusePublicKey, langfuseHost], minInstances: MIN_INSTANCES, maxInstances: MAX_INSTANCES }, async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'User must be authenticated');
 
     const { text } = request.data;
@@ -83,7 +83,7 @@ export const aiSpeak = onCall({ secrets: [openaiKey, langfuseKey, langfusePublic
     };
 });
 
-export const aiToolResolver = onCall({ secrets: [openaiKey, langfuseKey, langfusePublicKey, langfuseHost] }, async (request) => {
+export const aiToolResolver = onCall({ secrets: [openaiKey, langfuseKey, langfusePublicKey, langfuseHost], minInstances: MIN_INSTANCES, maxInstances: MAX_INSTANCES }, async (request) => {
     if (!request.auth) throw new HttpsError('unauthenticated', 'User must be authenticated');
 
     const { prompt } = request.data;

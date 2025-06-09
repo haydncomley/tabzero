@@ -1,9 +1,9 @@
 import { HttpsError, onCall, onRequest } from 'firebase-functions/https';
-import { firestore, stripeKey, stripePriceId, stripeWebhookSecret } from '../config';
+import { firestore, MAX_INSTANCES, MIN_INSTANCES, stripeKey, stripePriceId, stripeWebhookSecret } from '../config';
 import { tabzeroUser } from './types';
 import { getStripe } from '../vendor/stripe.vendor';
 
-export const stripeWebhook = onRequest({ secrets: [stripeKey, stripeWebhookSecret] }, async (request, response) => {
+export const stripeWebhook = onRequest({ secrets: [stripeKey, stripeWebhookSecret], minInstances: MIN_INSTANCES, maxInstances: MAX_INSTANCES}, async (request, response) => {
 	const sig = request.headers['stripe-signature'];
 	let event;
 	const stripe = getStripe();

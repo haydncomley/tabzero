@@ -16,6 +16,11 @@ const stringToHotkey = (hotkey: string) => hotkey.replace(/ /g, '');
 export const SettingsBar = () => {
 	const [deviceId, setDeviceId] = useSetting('deviceId');
 	const { keys, rebindSuccess, remap } = useHotkey('toggleRecording');
+	const {
+		keys: clipStreamKeys,
+		rebindSuccess: clipStreamRebindSuccess,
+		remap: clipStreamRemap,
+	} = useHotkey('clipStream');
 	const { devices } = useRecorder();
 
 	return (
@@ -44,7 +49,7 @@ export const SettingsBar = () => {
 
 			<div className="flex max-w-[25rem] basis-1/2 items-center gap-4">
 				<div className="w-full">
-					<p className="text-xs opacity-50">Hotkey</p>
+					<p className="text-xs opacity-50">Speak to AI</p>
 					<input
 						type="text"
 						className={classNames(
@@ -55,6 +60,23 @@ export const SettingsBar = () => {
 						)}
 						defaultValue={hotkeyToString(keys)}
 						onChange={(e) => remap(stringToHotkey(e.target.value))}
+					/>
+				</div>
+			</div>
+
+			<div className="flex max-w-[25rem] basis-1/2 items-center gap-4">
+				<div className="w-full">
+					<p className="text-xs opacity-50">Clip</p>
+					<input
+						type="text"
+						className={classNames(
+							'w-full appearance-none text-sm font-medium',
+							{
+								'text-red-500': !clipStreamRebindSuccess,
+							},
+						)}
+						defaultValue={hotkeyToString(clipStreamKeys)}
+						onChange={(e) => clipStreamRemap(stringToHotkey(e.target.value))}
 					/>
 				</div>
 			</div>

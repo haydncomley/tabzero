@@ -45,6 +45,13 @@ export default function Page() {
 		[!!recordButtonRef.current],
 	);
 
+	useHotkey('clipStream', () => {
+		resolveTools({ transcription: 'Clip the stream.' }).then((action) => {
+			if (!action) return;
+			runTools({ action });
+		});
+	});
+
 	const isLoading =
 		isResolvingTools ||
 		isRecordingDebounced ||

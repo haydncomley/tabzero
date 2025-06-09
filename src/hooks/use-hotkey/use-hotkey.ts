@@ -13,6 +13,7 @@ export const useHotkey = (
 	const mounted = useRef(false);
 	const [hotkeys, setHotkeys] = useSetting('hotkeys', {
 		toggleRecording: 'CommandOrControl+Shift+[',
+		clipStream: 'CommandOrControl+Shift+]',
 	});
 	const [rebindSuccess, setRebindSuccess] = useState(true);
 
@@ -30,7 +31,10 @@ export const useHotkey = (
 			});
 		}
 
-		if (callback) window.ipcRenderer.on('hotkey', callback);
+		if (callback)
+			window.ipcRenderer.on('hotkey', (_, namePressed: string) => {
+				if (namePressed == name) callback();
+			});
 
 		return () => {
 			if (callback) window.ipcRenderer.off('hotkey', callback);
@@ -38,6 +42,7 @@ export const useHotkey = (
 	}, [name, hotkeys[name], ...(deps ?? [])]);
 
 	const remap = async (keys: string) => {
+		console.log('remap', name, keys);
 		const success = await (window as any).ipcRenderer.invoke(
 			'register-hotkey',
 			{

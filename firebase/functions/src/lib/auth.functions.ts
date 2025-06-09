@@ -1,10 +1,10 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { FieldValue } from 'firebase-admin/firestore';
-import { auth, firestore, twitchClientId, twitchClientSecret, twitchRedirectUri } from '../config';
+import { auth, firestore, MAX_INSTANCES, MIN_INSTANCES, twitchClientId, twitchClientSecret, twitchRedirectUri } from '../config';
 import { TOOLS } from './tools';
 
 
-export const authTwitch = onCall({ secrets: [twitchClientId, twitchClientSecret, twitchRedirectUri] }, () => {
+export const authTwitch = onCall({ secrets: [twitchClientId, twitchClientSecret, twitchRedirectUri], minInstances: MIN_INSTANCES, maxInstances: MAX_INSTANCES }, () => {
 	const scopes = TOOLS.map((tool) => tool.scopes).flat().filter((scope) => scope.startsWith('twitch')).map((scope) => scope.replace('twitch@', '')).join(' ');
 
 	const url = [
@@ -18,7 +18,7 @@ export const authTwitch = onCall({ secrets: [twitchClientId, twitchClientSecret,
 	return { url };
 });
 
-export const authTwitchCallback = onCall({ secrets: [twitchClientId, twitchClientSecret, twitchRedirectUri] }, async (request) => {
+export const authTwitchCallback = onCall({ secrets: [twitchClientId, twitchClientSecret, twitchRedirectUri], minInstances: MIN_INSTANCES, maxInstances: MAX_INSTANCES }, async (request) => {
 	try {
 		const { code } = request.data as { code: string };
 

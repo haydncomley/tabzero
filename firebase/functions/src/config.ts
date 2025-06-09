@@ -13,6 +13,9 @@ export const CONFIG = {
 	version: '0.1.1',
 };
 
+export const MIN_INSTANCES = 1;
+export const MAX_INSTANCES = 24;
+
 export const openaiKey = defineSecret('OPENAI_KEY');
 export const langfuseKey = defineSecret('LANGFUSE_KEY');
 export const langfusePublicKey = defineSecret('LANGFUSE_PUBLIC_KEY');
