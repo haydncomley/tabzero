@@ -25,9 +25,9 @@ export const SettingsBar = () => {
 
 	return (
 		<div className="bg-outline flex w-full items-center gap-4 border-b p-3">
-			<div className="flex max-w-[25rem] basis-1/2 items-center gap-4 overflow-hidden">
+			<div className="mr-auto flex basis-1/3 items-center gap-4 overflow-hidden">
 				<div className="flex w-full flex-col overflow-hidden">
-					<label className="text-xs opacity-50">Microphone</label>
+					<label className="text-xs opacity-75">Microphone</label>
 					<select
 						value={deviceId}
 						className="m-0 appearance-none p-0 text-sm font-semibold"
@@ -47,9 +47,9 @@ export const SettingsBar = () => {
 				<ChevronsUpDown className="h-4 w-4 shrink-0"></ChevronsUpDown>
 			</div>
 
-			<div className="flex max-w-[25rem] basis-1/2 items-center gap-4">
+			<div className="flex w-full max-w-[15rem] items-center gap-4">
 				<div className="w-full">
-					<p className="text-xs opacity-50">Speak to AI</p>
+					<p className="text-xs opacity-75">Speak to AI</p>
 					<input
 						type="text"
 						className={classNames(
@@ -64,9 +64,9 @@ export const SettingsBar = () => {
 				</div>
 			</div>
 
-			<div className="flex max-w-[25rem] basis-1/2 items-center gap-4">
+			<div className="flex w-full max-w-[15rem] items-center gap-4">
 				<div className="w-full">
-					<p className="text-xs opacity-50">Clip</p>
+					<p className="text-xs opacity-75">Clip Stream</p>
 					<input
 						type="text"
 						className={classNames(

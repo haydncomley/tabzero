@@ -10,11 +10,11 @@ export const auth = getAuth(app);
 export const storage = getStorage(app);
 
 export const CONFIG = {
-	version: '0.1.1',
+	version: '0.1.5',
 };
 
 export const MIN_INSTANCES = 1;
-export const MAX_INSTANCES = 24;
+export const MAX_INSTANCES = 4;
 
 export const openaiKey = defineSecret('OPENAI_KEY');
 export const langfuseKey = defineSecret('LANGFUSE_KEY');

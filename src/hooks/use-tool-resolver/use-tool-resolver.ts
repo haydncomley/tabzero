@@ -3,12 +3,16 @@ import { httpsCallable } from 'firebase/functions';
 
 import { functions } from '../../main';
 import { useAudioPlayer } from '../use-audio-player';
+import { useTwitch } from '../use-twitch';
 import type { tabzeroToolAction } from './lib/types';
 
 const previousTextResolutions: string[] = [];
 
 export const useToolResolver = () => {
 	const { speak } = useAudioPlayer();
+	const { chatMessages } = useTwitch();
+	console.log(chatMessages);
+
 	const {
 		mutateAsync: resolveTools,
 		data: resolvedTools,
@@ -33,6 +37,7 @@ export const useToolResolver = () => {
 				prompt: options.transcription,
 			});
 
+			previousTextResolutions.shift();
 			return data.action;
 		},
 	});
@@ -43,6 +48,10 @@ export const useToolResolver = () => {
 			const toolRunner = httpsCallable<
 				{
 					action: tabzeroToolAction;
+					recentMessages?: {
+						user: string;
+						message: string;
+					}[];
 				},
 				{
 					id: string;
@@ -56,9 +65,11 @@ export const useToolResolver = () => {
 						| undefined;
 				}[]
 			>(functions, 'tool');
+			console.log('recentMessages', chatMessages);
 
 			const { data } = await toolRunner({
 				action: options.action,
+				recentMessages: chatMessages,
 			});
 
 			const firstWithTTS = data.find((tool) => tool.result?.tts);

@@ -1,5 +1,12 @@
 import classNames from 'classnames';
-import { Loader2, Check, X, AudioLines, Volume2 } from 'lucide-react';
+import {
+	Loader2,
+	Check,
+	X,
+	AudioLines,
+	Volume2,
+	ExternalLink,
+} from 'lucide-react';
 
 import { useAudioPlayer } from '~/hooks/use-audio-player';
 import type { tabzeroToolAction } from '~/hooks/use-tool-resolver/lib/types';
@@ -20,7 +27,7 @@ export const EventLog = ({ date, text, tools, isLoading }: EventLogProps) => {
 	return (
 		<div className="flex flex-col gap-4 border-b pb-4">
 			<div className="flex flex-col">
-				{date ? <p className="text-xs opacity-50">{date}</p> : null}
+				{date ? <p className="text-xs opacity-75">{date}</p> : null}
 				<p className="text-sm">{isLoading ? text : `"${text}"`}</p>
 			</div>
 
@@ -37,8 +44,8 @@ export const EventLog = ({ date, text, tools, isLoading }: EventLogProps) => {
 								className={classNames(
 									'flex shrink-0 items-center gap-3 rounded-xl border px-3 py-2',
 									{
-										'bg-outline/25': tool.status !== 'pending',
-										'bg-brand/25': tool.status === 'pending',
+										'bg-outline': tool.status !== 'pending',
+										'bg-brand text-brand-foreground': tool.status === 'pending',
 									},
 								)}
 							>
@@ -50,9 +57,26 @@ export const EventLog = ({ date, text, tools, isLoading }: EventLogProps) => {
 									<X className="h-5 w-5"></X>
 								)}
 								<div className="flex flex-col">
-									<p className="text-xs font-semibold">{tool.name}</p>
 									<p
-										className="max-w-64 overflow-hidden text-xs overflow-ellipsis whitespace-nowrap opacity-50"
+										className={classNames(
+											'mr-auto flex items-center gap-1 text-xs font-semibold',
+											{
+												'hover:text-brand hover:cursor-pointer': tool.link,
+											},
+										)}
+										onClick={() => {
+											if (tool.link) {
+												window.ipcRenderer.openExternal(tool.link);
+											}
+										}}
+									>
+										{tool.name}
+										{tool.link ? (
+											<ExternalLink className="h-3 w-3"></ExternalLink>
+										) : null}
+									</p>
+									<p
+										className="max-w-64 overflow-hidden text-xs overflow-ellipsis whitespace-nowrap opacity-75"
 										title={tool.context}
 									>
 										{tool.context}
@@ -98,7 +122,7 @@ export const EventLog = ({ date, text, tools, isLoading }: EventLogProps) => {
 					})}
 				</div>
 			) : !isLoading ? (
-				<div className="-mt-2 text-xs opacity-50">No tools used</div>
+				<div className="-mt-2 text-xs opacity-75">No tools used</div>
 			) : null}
 		</div>
 	);

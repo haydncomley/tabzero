@@ -11,6 +11,7 @@ export type tabzeroToolAction = {
 		context: string;
 		status: 'pending' | 'success' | 'error';
 		tts?: string;
+		link?: string;
 		details: {
 			arguments: string;
 			name: string;

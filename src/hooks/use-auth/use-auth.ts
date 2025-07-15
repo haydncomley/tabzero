@@ -6,6 +6,15 @@ import { auth, functions } from '../../main';
 import { useDocSnapshot } from '../use-snapshot';
 import type { tabzeroUser } from './lib/types';
 
+export const codeToToken = async (code: string) => {
+	const authTwitchCallback = httpsCallable<
+		{ code: string },
+		{ token: string; twitch: any }
+	>(functions, 'authTwitchCallback');
+	const { data } = await authTwitchCallback({ code });
+	return data.token;
+};
+
 export const useAuth = () => {
 	const { data: ready } = useQuery({
 		queryKey: ['ready'],
@@ -45,18 +54,8 @@ export const useAuth = () => {
 						},
 					]
 				>('auth', async (_e, { code }) => {
-					const authTwitchCallback = httpsCallable<
-						{ code: string },
-						{ token: string; twitch: any }
-					>(functions, 'authTwitchCallback');
-					const { data } = await authTwitchCallback({ code });
-
-					if (!data.token || !data.twitch) {
-						rej('token and twitch not found');
-						return;
-					}
-
-					signInWithCustomToken(auth, data.token).then(res).catch(rej);
+					const token = await codeToToken(code);
+					signInWithCustomToken(auth, token).then(res).catch(rej);
 				});
 			}),
 	});
@@ -126,6 +125,7 @@ export const useAuth = () => {
 						userDetails.stripe_subscription_status?.startsWith('active'),
 					isCancelling:
 						userDetails.stripe_subscription_status === 'active-canceled',
+					token: userDetails.providers[userDetails.provider].access_token,
 				}
 			: null,
 		subscribe,

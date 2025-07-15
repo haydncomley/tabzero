@@ -1,8 +1,10 @@
+import classNames from 'classnames';
 import { Loader2, LogOut, Moon, Sun, TicketPlus, TicketX } from 'lucide-react';
 
 import { useAuth } from '~/hooks/use-auth';
 import { useMeta } from '~/hooks/use-meta';
 import { useSetting } from '~/hooks/use-setting';
+import { useTwitch } from '~/hooks/use-twitch';
 
 import { version } from '../../../package.json';
 import { Button } from '../button';
@@ -20,6 +22,7 @@ export const Navbar = () => {
 		resume,
 		isResuming,
 	} = useAuth();
+	const { isLive, viewerCount } = useTwitch();
 	const { version: apiVersion } = useMeta();
 
 	return (
@@ -40,6 +43,19 @@ export const Navbar = () => {
 			</div>
 
 			<div className="flex items-center gap-3">
+				<div className="flex items-center gap-2">
+					<p className="text-sm tracking-widest">
+						{isLive ? 'LIVE' : 'OFFLINE'}
+					</p>
+					<div
+						className={classNames('h-2 w-2 rounded-full', {
+							'bg-brand animate-pulse': isLive,
+							'bg-foreground/50': !isLive,
+						})}
+					></div>
+					{isLive && <p className="text-sm">{viewerCount}</p>}
+				</div>
+
 				<Button
 					onClick={() => setDarkMode(!darkMode)}
 					variant="secondary"

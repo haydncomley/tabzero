@@ -16,6 +16,7 @@ import { HashRouter } from 'react-router-dom';
 
 import App from './App.tsx';
 import { USE_EMULATOR } from './config.ts';
+import { TwitchProvider } from './hooks/use-twitch/use-twitch.tsx';
 
 // Import the functions you need from the SDKs you need
 // TODO: Add SDKs for Firebase products that you want to use
@@ -41,6 +42,7 @@ export const functions = getFunctions(app);
 export const firestore = getFirestore(app);
 
 if (USE_EMULATOR) {
+	console.log('## USING EMULATORS ##');
 	connectAuthEmulator(auth, 'http://localhost:9099');
 	connectFunctionsEmulator(functions, 'localhost', 5001);
 	connectFirestoreEmulator(firestore, 'localhost', 8080);
@@ -56,16 +58,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 	<React.StrictMode>
 		<HashRouter>
 			<QueryClientProvider client={queryClient}>
-				<App />
+				<TwitchProvider>
+					<App />
+				</TwitchProvider>
 			</QueryClientProvider>
 		</HashRouter>
 	</React.StrictMode>,
 );
-
-// Use contextBridge
-// (window as any).ipcRenderer.on(
-// 	'main-process-message',
-// 	(_event: any, message: any) => {
-// 		console.log(_event, message);
-// 	},
-// );

@@ -1,0 +1,98 @@
+import { z } from 'zod';
+import { tabzeroTool } from '../../types';
+import { HttpsError } from 'firebase-functions/https';
+import { getTwitch } from '../../../vendor/twitch.vendor';
+import { getOpenAI } from '../../../vendor/openai.vendor';
+
+const toolSchema = z.object({
+	context: z.string(),
+	duration: z.number().nullable(),
+});
+
+export const twitchStreamUserTimeout = {
+	// LLM
+	name: 'twitchStreamUserTimeout',
+	description:
+		'Timeout a user for a specified amount of time (in seconds, default to 300 seconds).',
+	parameters: toolSchema,
+	scopes: ['twitch@chat:read', 'twitch@moderator:manage:banned_users'],
+	clientDetails: () => {
+		return {
+			name: 'Timeout User',
+			context: `Thinking...`,
+		};
+	},
+	// User
+	infoName: 'Twitch: Timeout User',
+	infoDescription: 'Timeout a user for a specified amount of time.',
+	// Action
+	function: async ({ user, recentMessages, duration, context }) => {
+		const api = getTwitch(user);
+
+		const { userId } = await api.getTokenInfo();
+		if (!userId)
+			throw new HttpsError('invalid-argument', 'User validation failed');
+
+		const openai = getOpenAI();
+
+		const response = await openai.chat.completions.create({
+			model: 'gpt-3.5-turbo',
+			messages: [
+				{
+					role: 'system',
+					content: `You are here to timeout a user for a specified amount of time. You will be provided a set of recent chat messages. These will be formatted as follows:
+                    <user>username</user><message>message</message>
+
+					Your job will be to find the user that the streamer has asked to be timed out. You should find the user that is closest to the context provided, this might be a partial name match, or maybe hints to what the message contains, for example swears or links.
+					Maybe the streamer will partially provided a username, for example "Timeout Jordan" and the name could be "the_gamer_jordan".
+					You should ONLY return the username of the user that the streamer has asked to be timed out.
+					You should NOT return any other information.
+
+					Recent Messages: 
+					${recentMessages?.map((m) => `<user>${m.user}</user><message>${m.message}</message>`).join('\n')}
+                    `,
+				},
+				{
+					role: 'user',
+					content: context,
+				},
+			],
+		});
+
+		const userName = response.choices[0].message.content;
+		const usernameExistsInMessages = recentMessages?.find(
+			(m) => m.user.toLowerCase() === userName?.toLowerCase(),
+		);
+
+		if (!userName) {
+			return { success: false, message: `User not found` };
+		}
+
+		if (!usernameExistsInMessages) {
+			return { success: false, message: `User not found in chat` };
+		}
+
+		const userToTimeout = await api.users.getUserByName(userName);
+
+		if (!userToTimeout) {
+			return { success: false, message: `User details not found` };
+		}
+
+		try {
+			await api.moderation.banUser(userId, {
+				user: userToTimeout.id,
+				reason: context,
+				duration: duration ?? 300,
+			});
+			openai.shutdownAsync;
+			return {
+				success: true,
+				message: `Timed out @${userName}`,
+				link: `https://www.twitch.tv/${userName}`,
+			};
+		} catch (error) {
+			console.error(error);
+			return { success: false, message: 'Failed to timeout user' };
+		}
+	},
+} as const satisfies tabzeroTool<typeof toolSchema>;

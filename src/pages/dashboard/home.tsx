@@ -12,6 +12,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Button } from '~/components/button';
 import { EventLog } from '~/components/event-log';
+import { useAudioPlayer } from '~/hooks/use-audio-player';
+import { SOUND_ON } from '~/hooks/use-audio-player/lib/constants';
 import { useAuth } from '~/hooks/use-auth';
 import { useDebounce } from '~/hooks/use-debounce';
 import { useHotkey } from '~/hooks/use-hotkey';
@@ -19,11 +21,14 @@ import { useLog } from '~/hooks/use-log';
 import { useMeta } from '~/hooks/use-meta';
 import { useSpeechToText } from '~/hooks/use-speech-to-text';
 import { useToolResolver } from '~/hooks/use-tool-resolver';
+import { useTwitch } from '~/hooks/use-twitch';
 
 export default function Page() {
 	const recordButtonRef = useRef<HTMLButtonElement>(null);
+	const { play } = useAudioPlayer();
 	const { subscribe, isSubscribing, details } = useAuth();
 	const { toolList } = useMeta();
+	const { isLive, chatMessages } = useTwitch();
 	const { log } = useLog();
 	const { transcribe, audioUrl, state, toggleRecording } = useSpeechToText();
 	const { resolveTools, runTools, isRunningTools, isResolvingTools } =
@@ -46,6 +51,7 @@ export default function Page() {
 	);
 
 	useHotkey('clipStream', () => {
+		play(SOUND_ON);
 		resolveTools({ transcription: 'Clip the stream.' }).then((action) => {
 			if (!action) return;
 			runTools({ action });
@@ -91,7 +97,7 @@ export default function Page() {
 
 	return (
 		<main className="relative !overflow-hidden">
-			<div className="flex h-full w-full flex-col gap-4 overflow-y-auto p-4">
+			<div className="no-scrollbar flex h-full w-full flex-col gap-4 overflow-y-auto p-4">
 				{isLoadingResolver ? (
 					<EventLog
 						date="Just Now"
@@ -116,7 +122,24 @@ export default function Page() {
 				))}
 			</div>
 
-			{/* Text Entry */}
+			{/* Chat Messages */}
+			{chatMessages.length && isLive ? (
+				<div className="absolute right-0 bottom-14 flex flex-col gap-2 p-4">
+					<div className="bg-background no-scrollbar flex max-h-[15rem] w-xs flex-col overflow-auto rounded-xl border">
+						{chatMessages.map((message) => (
+							<div
+								key={message.id}
+								className="flex flex-col p-3 px-4 not-last:border-b"
+							>
+								<p className="text-sm font-bold">{message.user}</p>
+								<p className="text-sm">{message.message}</p>
+							</div>
+						))}
+					</div>
+				</div>
+			) : null}
+
+			{/* Prompt Entry */}
 			<div
 				className={classNames(
 					'absolute right-0 bottom-0 flex items-center gap-2 p-4 transition-all duration-150',
@@ -139,14 +162,14 @@ export default function Page() {
 						'shadow-brand/25 flex items-center gap-3 rounded-xl border px-4 py-2 shadow-md transition-all duration-150',
 						{
 							'bg-brand text-brand-foreground border-brand-glint': !isLoading,
-							'bg-background text-foreground border-outline': isLoading,
+							'bg-brand-glint text-brand-foreground border-brand': isLoading,
 						},
 					)}
 				>
 					{isLoading ? (
 						<Loader2 className="h-4 w-4 shrink-0 animate-spin"></Loader2>
 					) : (
-						<Sparkles className="h-4 w-4 shrink-0"></Sparkles>
+						<Sparkles className="h-4 w-4 shrink-0 animate-pulse"></Sparkles>
 					)}
 					{!isLoading ? (
 						<input
@@ -222,8 +245,7 @@ export default function Page() {
 				<div className="border-b px-3 py-2">
 					<div className="flex items-center gap-2 font-bold">
 						<Sparkles className="h-4 w-4"></Sparkles>
-						AI Tools
-						<Sparkles className="h-4 w-4"></Sparkles>
+						Tools Available
 						<div className="ml-auto">
 							<Button
 								disabled={!showInfo}
@@ -238,7 +260,7 @@ export default function Page() {
 					</div>
 				</div>
 
-				<div className="flex max-h-[40vh] flex-wrap gap-2 overflow-auto p-3">
+				<div className="flex max-h-[50vh] flex-wrap gap-2 overflow-auto p-3">
 					{toolList.map((tool) => (
 						<div
 							key={tool.name}
@@ -269,7 +291,7 @@ export default function Page() {
 						Subscribe Now
 					</Button>
 
-					<p className="max-w-lg text-center text-sm opacity-50">
+					<p className="max-w-lg text-center text-sm opacity-75">
 						You can cancel at any time, no questions asked.
 						<br />
 						You'll also keep access to all features until your subscription
