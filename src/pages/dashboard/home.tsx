@@ -24,6 +24,8 @@ import { useStreamDeck } from '~/hooks/use-stream-deck';
 import { useToolResolver } from '~/hooks/use-tool-resolver';
 import { useTwitch } from '~/hooks/use-twitch';
 
+import StreamDeckIcon from './stream-deck-icon.jpg';
+
 const INFO_COLOR_MAP = {
 	Twitch: 'text-twitch-glint',
 	StreamDeck: 'text-stream-deck',
@@ -164,7 +166,7 @@ export default function Page() {
 			>
 				{isStreamDeckConnected ? (
 					<img
-						src="/stream-deck-icon.jpg"
+						src={StreamDeckIcon}
 						alt="Stream Deck Connected"
 						className="animate-blip h-9 w-9 cursor-pointer rounded-full transition-transform duration-75 hover:scale-90"
 						onClick={() => setShowInfo(!showInfo)}
