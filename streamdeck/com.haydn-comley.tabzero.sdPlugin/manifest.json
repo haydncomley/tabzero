@@ -1,0 +1,63 @@
+{
+	"Name": "tabzero",
+	"Version": "0.1.0.0",
+	"Author": "Haydn Comley",
+	"Actions": [
+		{
+			"Name": "AI Assistant (Toggle)",
+			"UUID": "com.haydn-comley.tabzero.toggle",
+			"Icon": "imgs/actions/toggle/icon",
+			"Tooltip": "Toggle the AI assistant on or off.",
+			"PropertyInspectorPath": "ui/toggle.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/toggle/disconnected"
+				}
+			],
+			"DisableAutomaticStates": true
+		},
+		{
+			"Name": "Clip Stream",
+			"UUID": "com.haydn-comley.tabzero.clip",
+			"Icon": "imgs/actions/clip/icon",
+			"Tooltip": "Clip the stream.",
+			"PropertyInspectorPath": "ui/clip.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/clip/disconnected"
+				}
+			],
+			"DisableAutomaticStates": true
+		}
+	],
+	"Category": "tabzero",
+	"CategoryIcon": "imgs/plugin/category-icon",
+	"CodePath": "bin/plugin.js",
+	"Description": "Your AI assistant at your fingertips with this tabzero integration",
+	"Icon": "imgs/plugin/marketplace",
+	"SDKVersion": 2,
+	"Software": {
+		"MinimumVersion": "6.5"
+	},
+	"OS": [
+		{
+			"Platform": "mac",
+			"MinimumVersion": "12"
+		},
+		{
+			"Platform": "windows",
+			"MinimumVersion": "10"
+		}
+	],
+	"Nodejs": {
+		"Version": "20",
+		"Debug": "enabled"
+	},
+	"UUID": "com.haydn-comley.tabzero"
+}

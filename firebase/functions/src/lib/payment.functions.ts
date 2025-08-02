@@ -101,6 +101,9 @@ export const stripeCheckout = onCall(
 			line_items: [{ price: stripePriceId.value(), quantity: 1 }],
 			success_url: `https://tabzero.gg/success`,
 			cancel_url: `https://tabzero.gg/cancel`,
+			subscription_data: {
+				trial_period_days: 28,
+			},
 		});
 
 		return { sessionId: session.id, sessionUrl: session.url };

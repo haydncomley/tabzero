@@ -1,15 +1,17 @@
 import { ipcMain } from 'electron';
 import Store from 'electron-store';
 
-const store = new Store<{
+export const store = new Store<{
 	darkMode: boolean;
 	deviceId?: string;
 	lastApiVersion?: string;
 	hotkeys: Record<string, string>;
+	streamDeck?: boolean;
 }>({
 	defaults: {
 		darkMode: false,
 		hotkeys: {},
+		streamDeck: false,
 	},
 });
 

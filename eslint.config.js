@@ -8,7 +8,14 @@ import reactHooksPlugin from 'eslint-plugin-react-hooks';
 
 export default [
 	{
-		ignores: ['node_modules', 'dist', 'dist-electron', 'vite.config.ts', 'firebase'],
+		ignores: [
+			'node_modules',
+			'dist',
+			'dist-electron',
+			'vite.config.ts',
+			'firebase',
+			'streamdeck',
+		],
 	},
 	// Base configuration for all files
 	{

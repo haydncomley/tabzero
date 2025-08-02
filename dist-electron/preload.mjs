@@ -33,5 +33,8 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   },
   setSetting(key, value) {
     return electron.ipcRenderer.invoke("set-setting", key, value);
+  },
+  sendToStreamDeck(options) {
+    return electron.ipcRenderer.invoke("send-to-stream-deck", options);
   }
 });

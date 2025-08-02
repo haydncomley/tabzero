@@ -11,7 +11,6 @@ const previousTextResolutions: string[] = [];
 export const useToolResolver = () => {
 	const { speak } = useAudioPlayer();
 	const { chatMessages } = useTwitch();
-	console.log(chatMessages);
 
 	const {
 		mutateAsync: resolveTools,
@@ -65,7 +64,6 @@ export const useToolResolver = () => {
 						| undefined;
 				}[]
 			>(functions, 'tool');
-			console.log('recentMessages', chatMessages);
 
 			const { data } = await toolRunner({
 				action: options.action,

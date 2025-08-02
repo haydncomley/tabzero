@@ -18,12 +18,21 @@ export default defineConfig({
 			main: {
 				// Shortcut of `build.lib.entry`.
 				entry: 'electron/main.ts',
+				vite: {
+					build: {
+						chunkSizeWarningLimit: 1000, // or a higher value if needed
+						rollupOptions: {
+							external: ['ws', 'bufferutil', 'utf-8-validate'],
+						},
+					},
+				},
 			},
 			preload: {
 				// Shortcut of `build.rollupOptions.input`.
 				// Preload scripts may contain Web assets, so use the `build.rollupOptions.input` instead `build.lib.entry`.
 				input: path.join(__dirname, 'electron/preload.ts'),
 			},
+
 			// Ployfill the Electron and Node.js API for Renderer process.
 			// If you want use Node.js in Renderer process, the `nodeIntegration` needs to be enabled in the Main process.
 			// See 👉 https://github.com/electron-vite/vite-plugin-electron-renderer
@@ -34,7 +43,4 @@ export default defineConfig({
 					: {},
 		}),
 	],
-	build: {
-		chunkSizeWarningLimit: 1000, // or a higher value if needed
-	},
 });

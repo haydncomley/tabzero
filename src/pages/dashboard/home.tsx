@@ -1,9 +1,9 @@
 import classNames from 'classnames';
 import {
-	AudioLines,
 	CircleFadingArrowUp,
 	HelpCircle,
 	Loader2,
+	Mic,
 	SendHorizonal,
 	Sparkles,
 	X,
@@ -20,8 +20,14 @@ import { useHotkey } from '~/hooks/use-hotkey';
 import { useLog } from '~/hooks/use-log';
 import { useMeta } from '~/hooks/use-meta';
 import { useSpeechToText } from '~/hooks/use-speech-to-text';
+import { useStreamDeck } from '~/hooks/use-stream-deck';
 import { useToolResolver } from '~/hooks/use-tool-resolver';
 import { useTwitch } from '~/hooks/use-twitch';
+
+const INFO_COLOR_MAP = {
+	Twitch: 'text-twitch-glint',
+	StreamDeck: 'text-stream-deck',
+};
 
 export default function Page() {
 	const recordButtonRef = useRef<HTMLButtonElement>(null);
@@ -33,6 +39,7 @@ export default function Page() {
 	const { transcribe, audioUrl, state, toggleRecording } = useSpeechToText();
 	const { resolveTools, runTools, isRunningTools, isResolvingTools } =
 		useToolResolver();
+	const { isStreamDeckConnected } = useStreamDeck();
 	const [showInfo, setShowInfo] = useState(false);
 	const [prompt, setPrompt] = useState('');
 
@@ -95,6 +102,13 @@ export default function Page() {
 		});
 	}, [audioUrl]);
 
+	useEffect(() => {
+		window.ipcRenderer.sendToStreamDeck({
+			isListening: state === 'recording',
+			isLoading: isLoadingResolver,
+		});
+	}, [isLoadingResolver, state === 'recording']);
+
 	return (
 		<main className="relative !overflow-hidden">
 			<div className="no-scrollbar flex h-full w-full flex-col gap-4 overflow-y-auto p-4">
@@ -148,6 +162,16 @@ export default function Page() {
 					},
 				)}
 			>
+				{isStreamDeckConnected ? (
+					<img
+						src="/stream-deck-icon.jpg"
+						alt="Stream Deck Connected"
+						className="animate-blip h-9 w-9 cursor-pointer rounded-full transition-transform duration-75 hover:scale-90"
+						onClick={() => setShowInfo(!showInfo)}
+						title="Stream Deck Connected"
+					/>
+				) : null}
+
 				<Button
 					size="small"
 					onClick={() => setShowInfo(!showInfo)}
@@ -227,7 +251,7 @@ export default function Page() {
 						{prompt.length ? (
 							<SendHorizonal className="h-4 w-4"></SendHorizonal>
 						) : (
-							<AudioLines className="h-4 w-4 text-inherit"></AudioLines>
+							<Mic className="h-4 w-4 text-inherit"></Mic>
 						)}
 					</button>
 				</div>
@@ -261,15 +285,42 @@ export default function Page() {
 				</div>
 
 				<div className="flex max-h-[50vh] flex-wrap gap-2 overflow-auto p-3">
-					{toolList.map((tool) => (
-						<div
-							key={tool.name}
-							className="rounded-lg border p-2.5 px-3"
-						>
-							<p className="text-xs font-semibold">{tool.name}</p>
-							<p className="text-xs opacity-75">{tool.description}</p>
+					{isStreamDeckConnected ? (
+						<div className="flex flex-col items-start rounded-lg border p-2.5 px-3">
+							<p className="from-stream-deck to-stream-deck-glint bg-gradient-to-r bg-clip-text text-xs font-bold text-transparent">
+								Stream Deck
+							</p>
+							<p className="text-xs opacity-75">
+								Use your Stream Deck to control tabzero.
+							</p>
 						</div>
-					))}
+					) : null}
+					{toolList.map((tool) => {
+						const toolVendor = tool.name.split(
+							':',
+						)[0] as keyof typeof INFO_COLOR_MAP;
+						const toolName = tool.name.split(':')[1];
+
+						return (
+							<div
+								key={tool.name}
+								className="flex flex-col items-start rounded-lg border p-2.5 px-3"
+							>
+								<p className="text-xs">
+									<span
+										className={classNames(
+											'font-bold',
+											INFO_COLOR_MAP[toolVendor],
+										)}
+									>
+										{toolVendor}
+									</span>
+									{` - ${toolName}`}
+								</p>
+								<p className="text-xs opacity-75">{tool.description}</p>
+							</div>
+						);
+					})}
 				</div>
 			</div>
 

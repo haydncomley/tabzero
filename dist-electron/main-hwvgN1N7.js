@@ -19,10 +19,33 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import process$1 from "node:process";
 import crypto from "node:crypto";
-import { WebSocketServer } from "ws";
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
+}
+function getAugmentedNamespace(n) {
+  if (n.__esModule) return n;
+  var f = n.default;
+  if (typeof f == "function") {
+    var a = function a2() {
+      if (this instanceof a2) {
+        return Reflect.construct(f, arguments, this.constructor);
+      }
+      return f.apply(this, arguments);
+    };
+    a.prototype = f.prototype;
+  } else a = {};
+  Object.defineProperty(a, "__esModule", { value: true });
+  Object.keys(n).forEach(function(k) {
+    var d2 = Object.getOwnPropertyDescriptor(n, k);
+    Object.defineProperty(a, k, d2.get ? d2 : {
+      enumerable: true,
+      get: function() {
+        return n[k];
+      }
+    });
+  });
+  return a;
 }
 var dist$1 = {};
 var s = 1e3;
@@ -10661,8 +10684,7 @@ class ElectronStore extends Conf {
 const store = new ElectronStore({
   defaults: {
     darkMode: false,
-    hotkeys: {},
-    streamDeck: false
+    hotkeys: {}
   }
 });
 const initStoreHandler = () => {
@@ -10677,45 +10699,15 @@ const initStoreHandler = () => {
     }
   );
 };
-const PORT = 51109;
-const initStreamDeckHandler = (window2) => {
-  const wss2 = new WebSocketServer({ port: PORT, perMessageDeflate: false });
-  store.set("streamDeck", false);
-  window2.webContents.send("setting-changed", "streamDeck", false);
-  ipcMain$1.handle(
-    "send-to-stream-deck",
-    (_, options) => {
-      wss2.clients.forEach((client) => {
-        if (client.readyState === 1) {
-          client.send(JSON.stringify(options));
-        }
+const initStreamDeckHandler = () => {
+  import("./index-vj2HJwoy.js").then((n) => n.i).then(({ WebSocketServer }) => {
+    const wss2 = new WebSocketServer({ port: 12345, perMessageDeflate: false });
+    wss2.on("connection", (socket) => {
+      console.log("[WS] Plugin connected");
+      socket.on("message", (message) => {
+        console.log("[WS] Received:", message.toString());
+        socket.send("Hello from Electron!");
       });
-    }
-  );
-  wss2.on("error", (error2) => {
-    console.error("[WS] Error:", error2);
-    store.set("streamDeck", false);
-    window2.webContents.send("setting-changed", "streamDeck", false);
-  });
-  wss2.on("connection", (socket) => {
-    console.log("[WS] Plugin connected");
-    store.set("streamDeck", true);
-    window2.webContents.send("setting-changed", "streamDeck", true);
-    socket.on("message", (message) => {
-      const actionName = message.toString();
-      switch (actionName) {
-        case "toggleRecording":
-          window2.webContents.send("hotkey", "toggleRecording");
-          break;
-        case "clipStream":
-          window2.webContents.send("hotkey", "clipStream");
-          break;
-      }
-    });
-    socket.on("close", () => {
-      console.log("[WS] Plugin disconnected");
-      store.set("streamDeck", false);
-      window2.webContents.send("setting-changed", "streamDeck", false);
     });
   });
 };
@@ -10750,7 +10742,7 @@ function createWindow() {
   }
   initAuthRedirectHandler(win);
   initHotkeyHandler(win);
-  initStreamDeckHandler(win);
+  initStreamDeckHandler();
 }
 app$1.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
@@ -10787,7 +10779,8 @@ if (!app$1.requestSingleInstanceLock()) {
   });
 }
 export {
-  MAIN_DIST,
-  RENDERER_DIST,
-  VITE_DEV_SERVER_URL
+  MAIN_DIST as M,
+  RENDERER_DIST as R,
+  VITE_DEV_SERVER_URL as V,
+  getAugmentedNamespace as g
 };

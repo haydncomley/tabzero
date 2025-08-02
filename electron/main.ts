@@ -11,6 +11,7 @@ import {
 } from './lib/auth-redirect-handler';
 import { initHotkeyHandler } from './lib/hotkey-handler';
 import { initStoreHandler } from './lib/store-handler';
+import { initStreamDeckHandler } from './lib/stream-deck-handler';
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -67,6 +68,7 @@ function createWindow() {
 
 	initAuthRedirectHandler(win);
 	initHotkeyHandler(win);
+	initStreamDeckHandler(win);
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common

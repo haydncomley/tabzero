@@ -42,7 +42,6 @@ export const useHotkey = (
 	}, [name, hotkeys[name], ...(deps ?? [])]);
 
 	const remap = async (keys: string) => {
-		console.log('remap', name, keys);
 		const success = await (window as any).ipcRenderer.invoke(
 			'register-hotkey',
 			{

@@ -76,7 +76,6 @@ export const useAudioPlayer = () => {
 	});
 
 	const play = useCallback((url: string) => {
-		console.log('play!');
 		const audio = new Audio(url);
 		audio.play();
 		audio.onended = () => {

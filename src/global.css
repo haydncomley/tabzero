@@ -18,15 +18,32 @@
 
 	--color-twitch: #9146ff;
 	--color-twitch-glint: #a86cff;
+	--color-stream-deck: #3531d0;
+	--color-stream-deck-glint: #8319d3;
+
+	--animate-blip: blip 0.15s ease-out;
+	@keyframes blip {
+		0% {
+			opacity: 0;
+			transform: scale(0.75);
+		}
+		100% {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
 }
 
 /* Always dark mode for now, will do themes later */
 @layer base {
 	@variant dark {
+		color-scheme: dark;
 		--color-background: #20201a;
 		--color-foreground: #fafafa;
 		--color-outline: #3d3d3d;
-		color-scheme: dark;
+
+		--color-stream-deck: #c044ff;
+		--color-stream-deck-glint: #284cff;
 	}
 
 	* {

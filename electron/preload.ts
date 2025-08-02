@@ -36,4 +36,7 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
 	setSetting(key: keyof StoreType, value: StoreType[typeof key]) {
 		return ipcRenderer.invoke('set-setting', key, value);
 	},
+	sendToStreamDeck(options: { isListening: boolean; isLoading: boolean }) {
+		return ipcRenderer.invoke('send-to-stream-deck', options);
+	},
 });

@@ -24,6 +24,10 @@ declare global {
 				key: T,
 				value: StoreType[T],
 			) => Promise<void>;
+			sendToStreamDeck: (options: {
+				isListening: boolean;
+				isLoading: boolean;
+			}) => Promise<void>;
 		};
 	}
 }
