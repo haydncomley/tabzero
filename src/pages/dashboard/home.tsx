@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import {
-	CircleFadingArrowUp,
+	ExternalLink,
 	HelpCircle,
 	Loader2,
 	Mic,
@@ -329,23 +329,67 @@ export default function Page() {
 			{/* First Subscription Overlay */}
 			{!details?.isSubscribed ? (
 				<div className="bg-background/50 absolute top-0 left-0 flex h-full w-full flex-col items-center justify-center gap-6 backdrop-blur-xs">
-					<h1 className="text-center text-xl">
-						Welcome to <b className="font-bold">tabzero</b> early access.
-						<br />
+					<h1 className="flex flex-col text-center text-xl">
+						<span>
+							Welcome to <b className="font-bold">tabzero</b>
+						</span>
 						<small className="text-sm">
-							AI Stream Assistant - Never tab out again.
+							Your personal AI Stream Assistant.
 						</small>
 					</h1>
-					<Button
-						onClick={() => subscribe()}
-						loading={isSubscribing}
-					>
-						<CircleFadingArrowUp></CircleFadingArrowUp>
-						Subscribe Now
-					</Button>
+
+					<div className="flex gap-4">
+						<article
+							onClick={() => subscribe({ length: 'monthly' })}
+							className="bg-background border-brand-glint/50 relative flex w-[10rem] cursor-pointer flex-col overflow-hidden rounded-2xl border p-4 pb-3 shadow-sm transition-transform hover:scale-105"
+						>
+							<h4 className="flex items-center gap-2">Monthly</h4>
+							<p>
+								<span className="text-md font-bold">£4.79</span>
+								<span className="text-sm opacity-75">/month</span>
+							</p>
+
+							<span className="mt-auto flex items-center justify-between gap-1 pt-3">
+								<span className="text-sm font-semibold">Get Started</span>
+								<ExternalLink className="h-3 w-3" />
+							</span>
+
+							{isSubscribing ? (
+								<div className="absolute inset-0 flex items-center justify-center backdrop-blur-md">
+									<Loader2 className="h-4 w-4 animate-spin" />
+								</div>
+							) : null}
+						</article>
+
+						<span className="flex h-full items-center text-sm opacity-75">
+							or
+						</span>
+
+						<article
+							onClick={() => subscribe({ length: 'yearly' })}
+							className="bg-brand text-brand-foreground border-brand-glint relative flex w-[10rem] cursor-pointer flex-col overflow-hidden rounded-2xl border p-4 pb-3 shadow-sm transition-transform hover:scale-105"
+						>
+							<h4 className="flex items-center gap-2">Annually</h4>
+							<p>
+								<span className="text-md font-bold">£30.00</span>
+								<span className="text-sm opacity-75">/year</span>
+							</p>
+
+							<span className="mt-auto flex items-center justify-between gap-1 pt-3">
+								<span className="text-sm font-semibold">Save £27.48</span>
+								<ExternalLink className="h-3 w-3" />
+							</span>
+
+							{isSubscribing ? (
+								<div className="absolute inset-0 flex items-center justify-center backdrop-blur-md">
+									<Loader2 className="h-4 w-4 animate-spin" />
+								</div>
+							) : null}
+						</article>
+					</div>
 
 					<p className="max-w-lg text-center text-sm opacity-75">
-						You can cancel at any time, no questions asked.
+						You can cancel at any time - no questions asked.
 						<br />
 						You'll also keep access to all features until your subscription
 						ends.

@@ -79,7 +79,11 @@ export const Navbar = () => {
 					</Button>
 				) : (
 					<Button
-						onClick={() => (details?.isCancelling ? resume() : subscribe())}
+						onClick={() =>
+							details?.isCancelling
+								? resume()
+								: subscribe({ length: 'monthly' })
+						}
 						loading={details?.isCancelling ? isResuming : isSubscribing}
 					>
 						<TicketPlus className="h-4 w-4"></TicketPlus>

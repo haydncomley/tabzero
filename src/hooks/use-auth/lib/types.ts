@@ -1,8 +1,10 @@
+import type { Timestamp } from 'firebase/firestore';
+
 export type tabzeroUser = {
 	uid: string;
 	provider: 'twitch';
-	timestamp_last: Date;
-	timestamp_created: Date;
+	timestamp_last: Timestamp;
+	timestamp_created: Timestamp;
 	providers: {
 		twitch: {
 			id: string;
@@ -17,4 +19,5 @@ export type tabzeroUser = {
 	stripe_customer_id?: string;
 	stripe_subscription_id?: string;
 	stripe_subscription_status?: 'active' | 'active-canceled' | 'inactive';
+	stripe_subscription_expires?: Timestamp;
 };

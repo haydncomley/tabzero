@@ -4,6 +4,7 @@ import {
 	MAX_INSTANCES,
 	stripeKey,
 	stripePriceId,
+	stripePriceIdYearly,
 	stripeWebhookSecret,
 } from '../config';
 import { tabzeroUser } from './types';
@@ -37,6 +38,14 @@ export const stripeWebhook = onRequest(
 			case 'checkout.session.completed': {
 				const session = event.data.object;
 				const { subscription, customer } = session;
+
+				// TODO: Get the subscription end date from the subscription object
+				// let subscriptionEnd = undefined;
+				// if (subscription) {
+				// 	const subscriptionDetails = await stripe.subscriptions.retrieve(subscription as string);
+				// 	subscriptionEnd = subscriptionDetails.;
+				// }
+
 				// find user by customer ID
 				const users = await firestore
 					.collection('users')
@@ -47,6 +56,9 @@ export const stripeWebhook = onRequest(
 					await users.docs[0].ref.update({
 						stripe_subscription_id: subscription,
 						stripe_subscription_status: 'active',
+						// stripe_subscription_expires: Timestamp.fromDate(
+						// 	new Date(subscription),
+						// ),
 					});
 				}
 				break;
@@ -74,10 +86,20 @@ export const stripeWebhook = onRequest(
 );
 
 export const stripeCheckout = onCall(
-	{ secrets: [stripeKey, stripePriceId], maxInstances: MAX_INSTANCES },
+	{
+		secrets: [stripeKey, stripePriceId, stripePriceIdYearly],
+		maxInstances: MAX_INSTANCES,
+	},
 	async (request) => {
 		if (!request.auth)
 			throw new HttpsError('unauthenticated', 'User must be authenticated');
+
+		const data = request.data as undefined | { length: 'monthly' | 'yearly' };
+
+		const priceId =
+			data && data.length === 'yearly'
+				? stripePriceIdYearly.value()
+				: stripePriceId.value();
 
 		const stripe = getStripe();
 
@@ -96,9 +118,10 @@ export const stripeCheckout = onCall(
 
 		const session = await stripe.checkout.sessions.create({
 			mode: 'subscription',
-			payment_method_types: ['card'],
+			// TODO: Make checkout more accessible to more countries by adding additional payment methods (like paypal & cashapp)
+			payment_method_types: ['card', 'klarna'],
 			customer: customerId,
-			line_items: [{ price: stripePriceId.value(), quantity: 1 }],
+			line_items: [{ price: priceId, quantity: 1 }],
 			success_url: `https://tabzero.gg/success`,
 			cancel_url: `https://tabzero.gg/cancel`,
 			subscription_data: {

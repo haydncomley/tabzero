@@ -10,7 +10,7 @@ export const auth = getAuth(app);
 export const storage = getStorage(app);
 
 export const CONFIG = {
-	version: '0.1.5',
+	version: '0.1.6',
 };
 
 export const MIN_INSTANCES = 1;
@@ -28,3 +28,4 @@ export const twitchRedirectUri = defineSecret('TWITCH_REDIRECT_URI');
 export const stripeKey = defineSecret('STRIPE_KEY');
 export const stripeWebhookSecret = defineSecret('STRIPE_WEBHOOK_SECRET');
 export const stripePriceId = defineSecret('STRIPE_PRICE_ID');
+export const stripePriceIdYearly = defineSecret('STRIPE_PRICE_ID_YEARLY');

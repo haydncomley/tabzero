@@ -20,7 +20,7 @@ export const twitchStreamSummary = {
 	infoName: 'Twitch: Stream Summary',
 	infoDescription: 'A summary of how the stream is going so far.',
 	// Action
-	function: async ({ user }) => {
+	function: async ({ user, recentMessages }) => {
 		const api = getTwitch(user);
 
 		const { userId } = await api.getTokenInfo();
@@ -29,28 +29,51 @@ export const twitchStreamSummary = {
 			throw new HttpsError('invalid-argument', 'User validation failed');
 
 		const stream = await api.streams.getStreamByUserId(userId);
+		const thumbnail = stream?.getThumbnailUrl(1280, 720);
 
 		if (!stream) return { success: false, message: 'Stream not live yet' };
 
 		const openai = getOpenAI();
 
+		const questionWithContext = `
+			Viewers: ${stream.viewers}
+			Game: ${stream.gameName}
+			Title: ${stream.title}
+			Streaming Time (in minutes): ${(Date.now() - stream.startDate.getTime()) / 60000}
+			Recent Messages: \n${recentMessages?.map((m) => `${m.user}: ${m.message}`).join('\n') ?? 'None'}
+			`;
+
 		const response = await openai.chat.completions.create({
-			model: 'gpt-3.5-turbo',
+			model: 'gpt-4.1-mini',
 			messages: [
 				{
 					role: 'system',
 					content: `You are here to summarise the stream of the user. The user is a streamer so you should be engaging and humorous (think what would be good for a Twitch stream/YouTube video - dark/sarcastic/dry humour is good).
                     This answer will also be spoken out loud so keep it short (like 5-10 seconds to speak max)
-                    You will get their viewer count, game/category, stream title and streaming time. If things are going well then tell them, if things are not... well also tell them.`,
+                    You will get their viewer count, game/category, stream title, streaming time and some recent messages from chat. If things are going well then tell them, if things are not... well also tell them.`,
 				},
 				{
 					role: 'user',
-					content: `
-                    Viewers: ${stream.viewers}
-                    Game: ${stream.gameName}
-                    Title: ${stream.title}
-                    Streaming Time (in minutes): ${(Date.now() - stream.startDate.getTime()) / 60000}
-                    `,
+					content: thumbnail
+						? [
+								{
+									type: 'text',
+									text: questionWithContext,
+								},
+								{
+									type: 'image_url',
+									image_url: {
+										url: thumbnail,
+										detail: 'high',
+									},
+								},
+							]
+						: [
+								{
+									type: 'text',
+									text: questionWithContext,
+								},
+							],
 				},
 			],
 		});

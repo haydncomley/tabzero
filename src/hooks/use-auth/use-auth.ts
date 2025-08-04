@@ -67,12 +67,12 @@ export const useAuth = () => {
 	});
 
 	const { mutateAsync: subscribe, isPending: isSubscribing } = useMutation({
-		mutationFn: async () => {
+		mutationFn: async ({ length }: { length: 'monthly' | 'yearly' }) => {
 			const stripeSubscribe = httpsCallable<
-				void,
+				{ length: typeof length },
 				{ sessionId: string; sessionUrl: string }
 			>(functions, 'stripeCheckout');
-			const { data } = await stripeSubscribe();
+			const { data } = await stripeSubscribe({ length });
 			window.ipcRenderer.openExternal(data.sessionUrl);
 			return data;
 		},
@@ -99,7 +99,7 @@ export const useAuth = () => {
 				const { data } = await stripeResume();
 				return data;
 			} catch {
-				subscribe();
+				subscribe({ length: 'monthly' });
 			}
 		},
 	});
