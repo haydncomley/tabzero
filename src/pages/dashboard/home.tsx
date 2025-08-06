@@ -24,8 +24,6 @@ import { useStreamDeck } from '~/hooks/use-stream-deck';
 import { useToolResolver } from '~/hooks/use-tool-resolver';
 import { useTwitch } from '~/hooks/use-twitch';
 
-import StreamDeckIcon from './stream-deck-icon.jpg';
-
 const INFO_COLOR_MAP = {
 	Twitch: 'text-twitch-glint',
 	StreamDeck: 'text-stream-deck',
@@ -164,16 +162,6 @@ export default function Page() {
 					},
 				)}
 			>
-				{isStreamDeckConnected ? (
-					<img
-						src={StreamDeckIcon}
-						alt="Stream Deck Connected"
-						className="animate-blip h-9 w-9 cursor-pointer rounded-full transition-transform duration-75 hover:scale-90"
-						onClick={() => setShowInfo(!showInfo)}
-						title="Stream Deck Connected"
-					/>
-				) : null}
-
 				<Button
 					size="small"
 					onClick={() => setShowInfo(!showInfo)}
@@ -395,6 +383,12 @@ export default function Page() {
 						ends.
 					</p>
 				</div>
+			) : null}
+
+			{isStreamDeckConnected ? (
+				<span className="from-stream-deck animate-blip to-stream-deck-glint text-brand-foreground absolute top-4 right-4 rounded-md bg-gradient-to-r px-1.5 py-0.5 text-sm font-bold uppercase">
+					Stream Deck Connected
+				</span>
 			) : null}
 		</main>
 	);

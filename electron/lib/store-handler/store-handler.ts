@@ -1,3 +1,4 @@
+import type { BrowserWindow } from 'electron';
 import { ipcMain } from 'electron';
 import Store from 'electron-store';
 
@@ -7,11 +8,13 @@ export const store = new Store<{
 	lastApiVersion?: string;
 	hotkeys: Record<string, string>;
 	streamDeck?: boolean;
+	referral?: string;
 }>({
 	defaults: {
 		darkMode: false,
 		hotkeys: {},
 		streamDeck: false,
+		referral: undefined,
 	},
 });
 
@@ -29,4 +32,13 @@ export const initStoreHandler = () => {
 			e.sender.send('setting-changed', key, value);
 		},
 	);
+};
+
+export const storeSet = (
+	window: BrowserWindow,
+	key: keyof StoreType,
+	value: StoreType[typeof key],
+) => {
+	store.set(key, value);
+	window.webContents.send('setting-changed', key, value);
 };

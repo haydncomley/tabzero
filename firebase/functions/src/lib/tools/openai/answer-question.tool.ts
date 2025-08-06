@@ -12,7 +12,7 @@ export const openaiAnswerQuestion = {
 	// LLM
 	name: 'openaiAnswerQuestion',
 	description:
-		'Answer any questions the streamer may have or provide general information. This tool can also be used to provide information about the streamer or the game they are playing.',
+		'Answer any questions the streamer may have or provide general information.',
 	parameters: toolSchema,
 	scopes: [],
 	clientDetails: ({ question }) => ({

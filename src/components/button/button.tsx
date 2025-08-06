@@ -25,7 +25,7 @@ export const Button = ({
 				'gap-2 rounded-full p-2 px-2': size === 'small',
 				'bg-brand border-brand-glint text-brand-foreground hover:bg-brand-glint':
 					variant === 'primary',
-				'bg-background border-outline text-foreground hover:bg-outline':
+				'bg-background border-outline text-foreground hover:bg-outline hover:border-background':
 					variant === 'secondary',
 				'bg-background border-brand text-brand hover:bg-outline':
 					variant === 'tertiary',

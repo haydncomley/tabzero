@@ -9,6 +9,7 @@ import {
 } from '../config';
 import { tabzeroUser } from './types';
 import { getStripe } from '../vendor/stripe.vendor';
+import { FieldValue } from 'firebase-admin/firestore';
 
 export const stripeWebhook = onRequest(
 	{ secrets: [stripeKey, stripeWebhookSecret], maxInstances: MAX_INSTANCES },
@@ -94,7 +95,9 @@ export const stripeCheckout = onCall(
 		if (!request.auth)
 			throw new HttpsError('unauthenticated', 'User must be authenticated');
 
-		const data = request.data as undefined | { length: 'monthly' | 'yearly' };
+		const data = request.data as
+			| undefined
+			| { length: 'monthly' | 'yearly'; ref?: string };
 
 		const priceId =
 			data && data.length === 'yearly'
@@ -114,6 +117,14 @@ export const stripeCheckout = onCall(
 			});
 			customerId = customer.id;
 			await userRef.update({ stripe_customer_id: customerId });
+		}
+
+		const ref = data?.ref;
+		if (ref) {
+			// TODO: When a referral is created also update the user that referred them
+			await userRef.update({
+				stripe_customer_refs: FieldValue.arrayUnion(ref),
+			});
 		}
 
 		const session = await stripe.checkout.sessions.create({

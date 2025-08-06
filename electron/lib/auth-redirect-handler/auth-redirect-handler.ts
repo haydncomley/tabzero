@@ -1,5 +1,6 @@
 import type { BrowserWindow } from 'electron';
 import { app } from 'electron';
+import { storeSet } from '../store-handler';
 
 export const PROTOCOL = 'tabzero';
 
@@ -13,8 +14,10 @@ export const handleProtocolUrl = async (
 	const searchParams = new URLSearchParams(url.search);
 	const code = searchParams.get('code');
 	const scope = searchParams.get('scope');
+	const ref = searchParams.get('referral');
 
 	if (!code || !scope) return 'no scope or code';
+	if (ref) storeSet(window, 'referral', ref);
 
 	window.webContents.send('auth', { code, scope });
 };

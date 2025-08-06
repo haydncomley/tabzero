@@ -1,7 +1,7 @@
 import classNames from 'classnames';
-import { Loader2, LogOut, Moon, Sun, TicketPlus, TicketX } from 'lucide-react';
+import { Home, Loader2, Moon, Settings, Sun } from 'lucide-react';
+import { Link, useLocation } from 'react-router';
 
-import { useAuth } from '~/hooks/use-auth';
 import { useMeta } from '~/hooks/use-meta';
 import { useSetting } from '~/hooks/use-setting';
 import { useTwitch } from '~/hooks/use-twitch';
@@ -12,18 +12,9 @@ import { Logo } from '../logo';
 
 export const Navbar = () => {
 	const [darkMode, setDarkMode] = useSetting('darkMode');
-	const {
-		details,
-		logout,
-		subscribe,
-		isSubscribing,
-		cancel,
-		isCancelling,
-		resume,
-		isResuming,
-	} = useAuth();
 	const { isLive, viewerCount } = useTwitch();
 	const { version: apiVersion } = useMeta();
+	const isSettings = useLocation().pathname.includes('/settings');
 
 	return (
 		<nav className="flex w-full items-center justify-between border-b p-3">
@@ -67,42 +58,18 @@ export const Navbar = () => {
 						<Moon className="h-4 w-4"></Moon>
 					)}
 				</Button>
-
-				{details?.isSubscribed && !details.isCancelling ? (
+				<Link to={isSettings ? '/dashboard/home' : '/dashboard/settings'}>
 					<Button
-						onClick={() => cancel()}
-						variant="secondary"
-						loading={isCancelling}
+						variant="primary"
+						size="regular"
 					>
-						<TicketX className="h-4 w-4"></TicketX>
-						Unsubscribe
+						{isSettings ? (
+							<Home className="h-4 w-4"></Home>
+						) : (
+							<Settings className="h-4 w-4"></Settings>
+						)}
 					</Button>
-				) : (
-					<Button
-						onClick={() =>
-							details?.isCancelling
-								? resume()
-								: subscribe({ length: 'monthly' })
-						}
-						loading={details?.isCancelling ? isResuming : isSubscribing}
-					>
-						<TicketPlus className="h-4 w-4"></TicketPlus>
-						{details?.isCancelling ? 'Re-subscribe' : 'Subscribe'}
-					</Button>
-				)}
-				<button className="group flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg">
-					<img
-						src={details?.profile_image}
-						alt={details?.display_name}
-					/>
-				</button>
-				<Button
-					onClick={() => logout()}
-					variant="secondary"
-				>
-					<LogOut className="h-4 w-4" />
-					Logout
-				</Button>
+				</Link>
 			</div>
 		</nav>
 	);

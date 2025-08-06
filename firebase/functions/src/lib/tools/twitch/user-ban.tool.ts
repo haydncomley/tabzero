@@ -16,7 +16,7 @@ export const twitchStreamUserBan = {
 	scopes: ['twitch@chat:read', 'twitch@moderator:manage:banned_users'],
 	clientDetails: () => {
 		return {
-			name: 'Timeout User',
+			name: 'Ban User',
 			context: `Thinking...`,
 		};
 	},

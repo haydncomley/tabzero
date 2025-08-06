@@ -3,6 +3,7 @@ import { signOut, signInWithCustomToken } from 'firebase/auth';
 import { httpsCallable } from 'firebase/functions';
 
 import { auth, functions } from '../../main';
+import { useSetting } from '../use-setting';
 import { useDocSnapshot } from '../use-snapshot';
 import type { tabzeroUser } from './lib/types';
 
@@ -16,6 +17,7 @@ export const codeToToken = async (code: string) => {
 };
 
 export const useAuth = () => {
+	const [referral] = useSetting('referral');
 	const { data: ready } = useQuery({
 		queryKey: ['ready'],
 		queryFn: async () => {
@@ -69,10 +71,13 @@ export const useAuth = () => {
 	const { mutateAsync: subscribe, isPending: isSubscribing } = useMutation({
 		mutationFn: async ({ length }: { length: 'monthly' | 'yearly' }) => {
 			const stripeSubscribe = httpsCallable<
-				{ length: typeof length },
+				{ length: typeof length; ref?: string },
 				{ sessionId: string; sessionUrl: string }
 			>(functions, 'stripeCheckout');
-			const { data } = await stripeSubscribe({ length });
+			const { data } = await stripeSubscribe({
+				length,
+				ref: referral,
+			});
 			window.ipcRenderer.openExternal(data.sessionUrl);
 			return data;
 		},

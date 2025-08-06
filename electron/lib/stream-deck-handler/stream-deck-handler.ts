@@ -1,14 +1,13 @@
 import { WebSocketServer } from 'ws';
 import type { BrowserWindow } from 'electron';
 import { ipcMain } from 'electron';
-import { store } from '../store-handler';
+import { storeSet } from '../store-handler';
 
 const PORT = 51109;
 
 export const initStreamDeckHandler = (window: BrowserWindow) => {
 	const wss = new WebSocketServer({ port: PORT, perMessageDeflate: false });
-	store.set('streamDeck', false);
-	window.webContents.send('setting-changed', 'streamDeck', false);
+	storeSet(window, 'streamDeck', false);
 
 	ipcMain.handle(
 		'send-to-stream-deck',
@@ -23,14 +22,12 @@ export const initStreamDeckHandler = (window: BrowserWindow) => {
 
 	wss.on('error', (error) => {
 		console.error('[WS] Error:', error);
-		store.set('streamDeck', false);
-		window.webContents.send('setting-changed', 'streamDeck', false);
+		storeSet(window, 'streamDeck', false);
 	});
 
 	wss.on('connection', (socket) => {
 		console.log('[WS] Plugin connected');
-		store.set('streamDeck', true);
-		window.webContents.send('setting-changed', 'streamDeck', true);
+		storeSet(window, 'streamDeck', true);
 
 		socket.on('message', (message) => {
 			const actionName = message.toString();
@@ -46,8 +43,7 @@ export const initStreamDeckHandler = (window: BrowserWindow) => {
 
 		socket.on('close', () => {
 			console.log('[WS] Plugin disconnected');
-			store.set('streamDeck', false);
-			window.webContents.send('setting-changed', 'streamDeck', false);
+			storeSet(window, 'streamDeck', false);
 		});
 	});
 };
