@@ -4,6 +4,7 @@ import type { z } from 'zod';
 
 type Vendor = 'twitch';
 
+// TODO: Merge the user types from the frontend and backend
 export interface tabzeroUser {
 	uid: string;
 	provider: Vendor;
@@ -20,11 +21,16 @@ export interface tabzeroUser {
 			refresh_token: string;
 		};
 	};
+	preferences?: {
+		voiceTone?: string;
+		voiceGender?: 'male' | 'female';
+	};
 	timestamp_last: Timestamp;
 	timestamp_created: Timestamp;
 	stripe_customer_id?: string;
 	stripe_subscription_id?: string;
 	stripe_subscription_status?: 'active' | 'active-canceled' | 'inactive';
+	stripe_subscription_expires?: Timestamp;
 }
 
 export type tabzeroTool<T extends z.ZodSchema, K extends string = string> = {

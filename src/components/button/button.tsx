@@ -19,7 +19,7 @@ export const Button = ({
 		{...props}
 		className={classNames(
 			className,
-			'relative flex items-center justify-center border text-sm transition-all duration-75 hover:cursor-pointer',
+			'relative flex items-center justify-center border text-sm transition-all duration-75 select-none hover:cursor-pointer',
 			{
 				'gap-3 rounded-lg p-2.5 px-4': size === 'regular',
 				'gap-2 rounded-full p-2 px-2': size === 'small',
@@ -30,6 +30,7 @@ export const Button = ({
 				'bg-background border-brand text-brand hover:bg-outline':
 					variant === 'tertiary',
 				'!text-brand-foreground/0': loading,
+				'pointer-events-none opacity-50': props.disabled,
 			},
 		)}
 	>

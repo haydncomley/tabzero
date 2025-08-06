@@ -12,7 +12,7 @@ export const useAudioPlayer = () => {
 	const [, setValue] = useState(0);
 
 	const { mutateAsync: speak, isPending: isLoadingSpeech } = useMutation({
-		mutationFn: async (options: { text: string }) => {
+		mutationFn: async (options: { text: string; flush?: boolean }) => {
 			const hasAudio = TRANSCRIPTION_AUDIO[options.text];
 			if (hasAudio) {
 				hasAudio.currentTime = hasAudio.duration;
@@ -21,7 +21,7 @@ export const useAudioPlayer = () => {
 
 			TRANSCRIPTION_STATE[options.text] = 0;
 
-			if (TRANSCRIPTIONS[options.text]) {
+			if (TRANSCRIPTIONS[options.text] && !options.flush) {
 				const audio = new Audio(TRANSCRIPTIONS[options.text]);
 				TRANSCRIPTION_AUDIO[options.text] = audio;
 				audio.play();

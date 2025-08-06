@@ -18,6 +18,7 @@ import {
 	openaiKey,
 } from '../config';
 import { FieldValue } from 'firebase-admin/firestore';
+import { tabzeroUser } from './types';
 
 export const aiChat = onCall(
 	{
@@ -93,17 +94,28 @@ export const aiSpeak = onCall(
 		const { text } = request.data;
 		if (!text) throw new HttpsError('invalid-argument', 'Missing text');
 
+		const user = await firestore
+			.collection('users')
+			.doc(request.auth.uid)
+			.get();
+
+		const userData = user.exists ? (user.data() as tabzeroUser) : null;
+		const isMale = userData?.preferences?.voiceGender !== 'female';
+		const tone =
+			userData?.preferences?.voiceTone ??
+			`Voice: Cringe, higher pitched, slightly out of breath and a bit of a stutter.
+        Tone: Exited and exaggerated, very sarcastic.
+        Dialect: American/British - somewhere in-between.
+        Features: GenZ slang is a must, gaming terms are also appreciated - dry humour is encouraged. I want you to sound a bit like a young football commentator.
+        `;
+
 		const openai = getOpenAI();
 
 		const mp3 = await openai.audio.speech.create({
 			model: 'gpt-4o-mini-tts',
-			voice: 'verse',
+			voice: isMale ? 'verse' : 'sage',
 			input: text,
-			instructions: `Voice: Cringe, higher pitched, slightly out of breath and a bit of a stutter.
-        Tone: Exited and exaggerated, very sarcastic.
-        Dialect: American/British - somewhere in-between.
-        Features: GenZ slang is a must, gaming terms are also appreciated - dry humour is encouraged. I want you to sound a bit like a young football commentator.
-        `,
+			instructions: tone,
 		});
 
 		const buffer = Buffer.from(await mp3.arrayBuffer());

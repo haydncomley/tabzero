@@ -1,5 +1,6 @@
 import type { Timestamp } from 'firebase/firestore';
 
+// TODO: Merge the user types from the frontend and backend
 export type tabzeroUser = {
 	uid: string;
 	provider: 'twitch';
@@ -15,6 +16,10 @@ export type tabzeroUser = {
 			create_at: string;
 			access_token: string;
 		};
+	};
+	preferences?: {
+		voiceTone?: string;
+		voiceGender?: 'male' | 'female';
 	};
 	stripe_customer_id?: string;
 	stripe_subscription_id?: string;

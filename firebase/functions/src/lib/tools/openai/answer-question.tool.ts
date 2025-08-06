@@ -21,7 +21,7 @@ export const openaiAnswerQuestion = {
 	}),
 	// User
 	infoName: 'General: Answer Questions',
-	infoDescription: 'Get answers back to general questions with a voice.',
+	infoDescription: 'Get spoken answers back to questions.',
 	// Action
 	function: async ({ user, question, recentMessages }) => {
 		const openai = getOpenAI();

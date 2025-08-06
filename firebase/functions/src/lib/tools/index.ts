@@ -7,9 +7,11 @@ import { twitchClipCreate } from './twitch/action-clip-create.tool';
 import { twitchStreamSummary } from './twitch/analysis-stream-summary.tool';
 import { twitchStreamUserTimeout } from './twitch/user-timeout.tool';
 import { twitchStreamUserBan } from './twitch/user-ban.tool';
+import { openaiSimonSays } from './openai/simon-says.tool';
 
 export const TOOLS: tabzeroTool<any>[] = [
 	openaiAnswerQuestion,
+	openaiSimonSays,
 	twitchStreamChangeTitle,
 	twitchStreamChangeCategory,
 	twitchClipCreate,

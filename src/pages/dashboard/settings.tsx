@@ -5,19 +5,28 @@ import {
 	ExternalLink,
 	LogOut,
 	Moon,
+	AudioLines,
+	Save,
 	Sun,
 	TicketPlus,
 	TicketX,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 
 import { Button } from '~/components/button';
 import { DotMatrix } from '~/components/dot-matrix';
 import { Referral } from '~/components/referral';
+import { useAudioPlayer } from '~/hooks/use-audio-player';
 import { useAuth } from '~/hooks/use-auth';
 import { useSetting } from '~/hooks/use-setting';
 import { useStreamDeck } from '~/hooks/use-stream-deck';
+
+const TEST_PHRASE = [
+	'Hello there, tabzero reporting for duty and ready to assist you.',
+	'Lets get this stream started and pump those viewing numbers up.',
+	'Howdy partner, this is your rootin tootin assistant here to help.',
+];
 
 export default function Page() {
 	const {
@@ -30,10 +39,30 @@ export default function Page() {
 		isResuming,
 		logout,
 		isLoggingOut,
+		updateVoice,
+		isUpdatingVoice,
 	} = useAuth();
 	const { isStreamDeckConnected } = useStreamDeck();
+	const { speak, isLoadingSpeech } = useAudioPlayer();
 	const [darkMode, setDarkMode] = useSetting('darkMode');
 	const [referralImageLink, setReferralImageLink] = useState<string>();
+	const [testPhraseIndex, setTestPhraseIndex] = useState(0);
+
+	const [voiceGender, setVoiceGender] = useState<'male' | 'female' | undefined>(
+		details?.preferences?.voiceGender,
+	);
+	const [voiceTone, setVoiceTone] = useState<string | undefined>(
+		details?.preferences?.voiceTone,
+	);
+
+	useEffect(() => {
+		setVoiceGender(details?.preferences?.voiceGender);
+		setVoiceTone(details?.preferences?.voiceTone);
+	}, [details?.preferences?.voiceGender, details?.preferences?.voiceTone]);
+
+	const hasVoiceChanges =
+		details?.preferences?.voiceGender !== voiceGender ||
+		details?.preferences?.voiceTone !== voiceTone;
 
 	return (
 		<main className="relative flex !flex-row">
@@ -101,20 +130,22 @@ export default function Page() {
 			</div>
 
 			<div className="h-full w-full">
-				<div className="flex h-full w-full basis-1 flex-col overflow-y-auto px-4">
-					<div className="flex flex-col gap-1 border-b py-4">
+				<div className="flex h-full w-full basis-1 flex-col overflow-y-auto px-4 [&>*:not(:last-child)]:border-b">
+					{/* Stream Deck */}
+					<div className="flex flex-col gap-1 py-4">
 						<div className="flex flex-col">
 							<label className="text-sm font-bold">Stream Deck</label>
 							<p className="text-foreground/75 text-sm">
 								Get the{' '}
+								{/* TODO: Update this link to the new streamdeck plugin when its available */}
 								<Link
-									to="https://www.elgato.com/en/gaming/stream-deck"
+									to="https://marketplace.elgato.com/search?q=tabzero"
 									target="_blank"
 									className="text-brand inline-flex items-center gap-1 hover:underline"
 									onClick={(e) => {
 										e.preventDefault();
 										window.ipcRenderer.openExternal(
-											'https://www.elgato.com/en/gaming/stream-deck',
+											'https://marketplace.elgato.com/search?q=tabzero',
 										);
 									}}
 								>
@@ -135,7 +166,8 @@ export default function Page() {
 						</p>
 					</div>
 
-					<div className="flex flex-col gap-2 border-b py-4">
+					{/* Theme */}
+					<div className="flex flex-col gap-2 py-4">
 						<div className="flex flex-col">
 							<label className="text-sm font-bold">Theme</label>
 							<p className="text-foreground/75 text-sm">
@@ -160,7 +192,79 @@ export default function Page() {
 						</div>
 					</div>
 
-					<div className="flex flex-col gap-2 border-b py-4">
+					{/* AI Voice */}
+					<div className="flex flex-col gap-2 py-4">
+						<div className="flex flex-col">
+							<label className="text-sm font-bold">AI Voice Settings</label>
+							<p className="text-foreground/75 text-sm">
+								Save your changes in order to test how the AI will sound.
+							</p>
+						</div>
+						<div className="flex gap-2">
+							<div className="flex flex-col gap-2">
+								<Button
+									variant={voiceGender !== 'female' ? 'primary' : 'secondary'}
+									onClick={() => setVoiceGender('male')}
+								>
+									Masculine
+								</Button>
+								<Button
+									variant={voiceGender === 'female' ? 'primary' : 'secondary'}
+									onClick={() => setVoiceGender('female')}
+								>
+									Feminine
+								</Button>
+							</div>
+							<div className="flex w-full flex-col gap-2">
+								<textarea
+									placeholder={
+										'Voice: Very cringe, sarcastic, high-pitched and excited - stutter sometimes and be out of breath between words.\nTone: Excited and exaggerated, very sarcastic.\nDialect: American/British - somewhere in-between.'
+									}
+									className="border-outline placeholder:text-foreground/75 dark:placeholder:text-background/50 h-full min-h-full w-full resize-y rounded-md border p-2 text-sm"
+									value={voiceTone}
+									onChange={(e) => setVoiceTone(e.target.value)}
+								/>
+							</div>
+							<div className="flex flex-col gap-2">
+								<Button
+									variant="secondary"
+									disabled={hasVoiceChanges || isLoadingSpeech}
+									loading={isLoadingSpeech}
+									onClick={() => {
+										if (hasVoiceChanges) return;
+										const phrase = TEST_PHRASE[testPhraseIndex];
+										setTestPhraseIndex(
+											(prev) => (prev + 1) % TEST_PHRASE.length,
+										);
+										speak({
+											text: phrase,
+											flush: true,
+										});
+									}}
+								>
+									<AudioLines className="h-4 w-4"></AudioLines>
+									Test
+								</Button>
+								<Button
+									variant="primary"
+									loading={isUpdatingVoice}
+									disabled={!hasVoiceChanges || isUpdatingVoice}
+									onClick={() => {
+										updateVoice({
+											tone: voiceTone,
+											gender: voiceGender,
+										});
+									}}
+								>
+									<Save className="h-4 w-4"></Save>
+									Save
+								</Button>
+							</div>
+						</div>
+					</div>
+
+					{/* Refer a friend */}
+					<div className="flex flex-col gap-2 py-4">
 						<div className="flex flex-col">
 							<label className="text-sm font-bold">Refer a friend</label>
 							<p className="text-foreground/75 text-sm">

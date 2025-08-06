@@ -109,6 +109,24 @@ export const useAuth = () => {
 		},
 	});
 
+	const { mutateAsync: updateVoice, isPending: isUpdatingVoice } = useMutation({
+		mutationFn: async ({
+			tone,
+			gender,
+		}: {
+			tone?: string;
+			gender?: string;
+		}) => {
+			const preferencesVoice = httpsCallable<
+				{ tone?: string; gender?: string },
+				{ success: boolean; message: string }
+			>(functions, 'preferencesVoice');
+			await preferencesVoice({ tone, gender });
+		},
+	});
+
+	const isUpdatingPreferences = isUpdatingVoice;
+
 	return {
 		login,
 		isLoggingIn,
@@ -131,6 +149,7 @@ export const useAuth = () => {
 					isCancelling:
 						userDetails.stripe_subscription_status === 'active-canceled',
 					token: userDetails.providers[userDetails.provider].access_token,
+					preferences: userDetails.preferences,
 				}
 			: null,
 		subscribe,
@@ -139,5 +158,8 @@ export const useAuth = () => {
 		isCancelling,
 		resume,
 		isResuming,
+		updateVoice,
+		isUpdatingVoice,
+		isUpdatingPreferences,
 	};
 };
