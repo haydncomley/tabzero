@@ -8,6 +8,7 @@ import { twitchStreamSummary } from './twitch/analysis-stream-summary.tool';
 import { twitchStreamUserTimeout } from './twitch/user-timeout.tool';
 import { twitchStreamUserBan } from './twitch/user-ban.tool';
 import { openaiSimonSays } from './openai/simon-says.tool';
+import { twitchStreamChatSummary } from './twitch/analysis-chat-summary.tool copy';
 
 export const TOOLS: tabzeroTool<any>[] = [
 	openaiAnswerQuestion,
@@ -16,6 +17,7 @@ export const TOOLS: tabzeroTool<any>[] = [
 	twitchStreamChangeCategory,
 	twitchClipCreate,
 	twitchStreamSummary,
+	twitchStreamChatSummary,
 	twitchStreamChangeChatSettings,
 	twitchStreamUserTimeout,
 	twitchStreamUserBan,

@@ -17,6 +17,7 @@ import { Link } from 'react-router';
 import { Button } from '~/components/button';
 import { DotMatrix } from '~/components/dot-matrix';
 import { Referral } from '~/components/referral';
+import { Title } from '~/components/title';
 import { useAudioPlayer } from '~/hooks/use-audio-player';
 import { useAuth } from '~/hooks/use-auth';
 import { useSetting } from '~/hooks/use-setting';
@@ -66,13 +67,14 @@ export default function Page() {
 
 	return (
 		<main className="relative flex !flex-row">
+			<Title title="tabzero - Settings" />
 			<div className="relative h-full w-[12rem] border-r">
 				<DotMatrix ignoreMouse />
 				<div className="relative z-1 flex h-full w-full flex-col items-center gap-2 overflow-x-hidden overflow-y-auto p-6">
 					<img
 						src={details?.profile_image}
 						alt={details?.display_name}
-						className="h-24 w-24 rounded-full"
+						className="border-outline h-24 w-24 rounded-full border-2"
 					/>
 					<div className="flex flex-col items-center gap-1">
 						<h1
@@ -83,7 +85,7 @@ export default function Page() {
 						</h1>
 						<p
 							className={classNames(
-								'rounded-sm px-1.5 py-0.5 text-xs uppercase',
+								'rounded-sm px-1.5 py-0.5 text-xs tracking-wide uppercase',
 								{
 									'bg-brand text-brand-foreground': details?.isSubscribed,
 									'bg-outline text-foreground': !details?.isSubscribed,
@@ -141,7 +143,7 @@ export default function Page() {
 								<Link
 									to="https://marketplace.elgato.com/search?q=tabzero"
 									target="_blank"
-									className="text-brand inline-flex items-center gap-1 hover:underline"
+									className="text-brand inline-flex items-center gap-0.5 hover:underline"
 									onClick={(e) => {
 										e.preventDefault();
 										window.ipcRenderer.openExternal(
@@ -149,10 +151,10 @@ export default function Page() {
 										);
 									}}
 								>
-									Stream Deck plugin
+									Stream Deck
 									<ExternalLink className="h-3 w-3"></ExternalLink>
 								</Link>{' '}
-								to trigger tabzero remotely.
+								plugin to trigger tabzero remotely.
 							</p>
 						</div>
 						<p className="flex items-center gap-2 font-bold">
@@ -171,7 +173,7 @@ export default function Page() {
 						<div className="flex flex-col">
 							<label className="text-sm font-bold">Theme</label>
 							<p className="text-foreground/75 text-sm">
-								Change the theme of the app to your liking
+								Change the theme of the app to match your system.
 							</p>
 						</div>
 						<div className="flex gap-2">

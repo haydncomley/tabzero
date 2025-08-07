@@ -8,19 +8,17 @@ import { auth } from './main';
 
 import routes from '~react-pages';
 
-if (import.meta.env.DEV) {
-	(window as any).devLogin = (...args: any[]) => {
-		const url = new URL(args[0]);
-		const code = url.searchParams.get('code');
-		const scope = url.searchParams.get('scope');
+(window as any).devLogin = (...args: any[]) => {
+	const url = new URL(args[0]);
+	const code = url.searchParams.get('code');
+	const scope = url.searchParams.get('scope');
 
-		if (!code || !scope) return;
+	if (!code || !scope) return;
 
-		codeToToken(code).then((token) => {
-			signInWithCustomToken(auth, token);
-		});
-	};
-}
+	codeToToken(code).then((token) => {
+		signInWithCustomToken(auth, token);
+	});
+};
 
 export default function App() {
 	const [darkMode] = useSetting('darkMode');

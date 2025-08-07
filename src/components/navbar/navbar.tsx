@@ -19,8 +19,11 @@ export const Navbar = () => {
 	return (
 		<nav className="flex w-full items-center justify-between border-b p-3">
 			<div className="flex items-center gap-2">
-				<Logo className="h-10 w-10"></Logo>
-				<div className="ml-2 flex flex-col">
+				<Logo
+					className="h-10 w-10 rounded-lg"
+					variant="brand"
+				></Logo>
+				<div className="ml-0.5 flex flex-col">
 					<h1 className="text-xl font-bold">tabzero</h1>
 					<p className="text-foreground/50 flex items-center gap-2 text-xs">
 						Client v{version}

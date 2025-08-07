@@ -12,6 +12,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Button } from '~/components/button';
 import { EventLog } from '~/components/event-log';
+import { Title } from '~/components/title';
 import { useAudioPlayer } from '~/hooks/use-audio-player';
 import { SOUND_ON } from '~/hooks/use-audio-player/lib/constants';
 import { useAuth } from '~/hooks/use-auth';
@@ -111,6 +112,7 @@ export default function Page() {
 
 	return (
 		<main className="relative !overflow-hidden">
+			<Title title="tabzero - Home" />
 			<div className="no-scrollbar flex h-full w-full flex-col gap-4 overflow-y-auto p-4">
 				{isLoadingResolver ? (
 					<EventLog
@@ -386,7 +388,7 @@ export default function Page() {
 			) : null}
 
 			{isStreamDeckConnected ? (
-				<span className="from-stream-deck animate-blip to-stream-deck-glint text-brand-foreground absolute top-4 right-4 rounded-md bg-gradient-to-r px-1.5 py-0.5 text-sm font-bold uppercase">
+				<span className="from-stream-deck animate-blip to-stream-deck-glint text-brand-foreground absolute top-4 right-4 rounded-md border bg-gradient-to-r px-1.5 py-0.5 text-sm font-bold tracking-wide uppercase">
 					Stream Deck Connected
 				</span>
 			) : null}

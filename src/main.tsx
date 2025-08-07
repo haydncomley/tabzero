@@ -12,7 +12,7 @@ import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { HashRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 
 import App from './App.tsx';
 import { USE_EMULATOR } from './config.ts';
@@ -56,12 +56,12 @@ onAuthStateChanged(auth, async (user) => {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
 	<React.StrictMode>
-		<HashRouter>
+		<BrowserRouter>
 			<QueryClientProvider client={queryClient}>
 				<TwitchProvider>
 					<App />
 				</TwitchProvider>
 			</QueryClientProvider>
-		</HashRouter>
+		</BrowserRouter>
 	</React.StrictMode>,
 );

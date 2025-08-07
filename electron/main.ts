@@ -12,6 +12,8 @@ import {
 import { initHotkeyHandler } from './lib/hotkey-handler';
 import { initStoreHandler } from './lib/store-handler';
 import { initStreamDeckHandler } from './lib/stream-deck-handler';
+import http from 'node:http';
+import sirv from 'sirv';
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -29,6 +31,11 @@ if (require('electron-squirrel-startup')) app.quit();
 // │ │ └── preload.mjs
 // │
 process.env.APP_ROOT = path.join(__dirname, '..');
+
+const serve = sirv(path.join(__dirname, '../dist'), {
+	single: true,
+});
+const server = http.createServer((req, res) => serve(req, res));
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL'];
@@ -59,11 +66,12 @@ function createWindow() {
 		win?.webContents.send('main-process-message', { hello: 'world' });
 	});
 
+	console.log('RENDERER_DIST', RENDERER_DIST);
+
 	if (VITE_DEV_SERVER_URL) {
 		win.loadURL(VITE_DEV_SERVER_URL);
 	} else {
-		// win.loadFile('dist/index.html')
-		win.loadFile(path.join(RENDERER_DIST, 'index.html'));
+		win.loadURL('http://localhost:11599');
 	}
 
 	initAuthRedirectHandler(win);
@@ -112,7 +120,14 @@ if (!app.requestSingleInstanceLock()) {
 	});
 
 	app.whenReady().then(() => {
-		createWindow();
-		handleArgs(process.argv);
+		if (VITE_DEV_SERVER_URL) {
+			createWindow();
+			handleArgs(process.argv);
+		} else {
+			server.listen(11599, () => {
+				createWindow();
+				handleArgs(process.argv);
+			});
+		}
 	});
 }
