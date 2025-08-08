@@ -36,7 +36,7 @@ export const twitchStreamUserTimeout = {
 		const openai = getOpenAI();
 
 		const response = await openai.chat.completions.create({
-			model: 'gpt-3.5-turbo',
+			model: 'gpt-5-mini',
 			messages: [
 				{
 					role: 'system',
@@ -84,10 +84,9 @@ export const twitchStreamUserTimeout = {
 				reason: context,
 				duration: duration ?? 300,
 			});
-			openai.shutdownAsync;
 			return {
 				success: true,
-				message: `Timed out @${userName}`,
+				message: `Timed out: ${userName}`,
 				link: `https://www.twitch.tv/${userName}`,
 			};
 		} catch (error) {

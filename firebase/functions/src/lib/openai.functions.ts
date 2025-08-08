@@ -35,7 +35,7 @@ export const aiChat = onCall(
 
 		const openai = getOpenAI();
 		const response = await openai.chat.completions.create({
-			model: 'gpt-4.1',
+			model: 'gpt-5',
 			messages: [{ role: 'user', content: prompt }],
 		});
 
@@ -147,7 +147,7 @@ export const aiToolResolver = onCall(
 			toolsAlreadyUsed: ChatCompletionMessageToolCall[],
 		) => {
 			const response = await openai.chat.completions.create({
-				model: 'gpt-4.1-mini',
+				model: 'gpt-5-mini',
 				messages: [
 					{ role: 'user', content: prompt },
 					...toolsAlreadyUsed

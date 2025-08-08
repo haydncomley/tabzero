@@ -125,7 +125,18 @@ export const useAuth = () => {
 		},
 	});
 
-	const isUpdatingPreferences = isUpdatingVoice;
+	const { mutateAsync: updateBitsTTS, isPending: isUpdatingBitsTTS } =
+		useMutation({
+			mutationFn: async ({ bitsTTS }: { bitsTTS?: string }) => {
+				const preferencesBitsTTS = httpsCallable<
+					{ bitsTTS?: string },
+					{ success: boolean; message: string }
+				>(functions, 'preferencesBitsTTS');
+				await preferencesBitsTTS({ bitsTTS });
+			},
+		});
+
+	const isUpdatingPreferences = isUpdatingVoice || isUpdatingBitsTTS;
 
 	return {
 		login,
@@ -160,6 +171,8 @@ export const useAuth = () => {
 		isResuming,
 		updateVoice,
 		isUpdatingVoice,
+		updateBitsTTS,
+		isUpdatingBitsTTS,
 		isUpdatingPreferences,
 	};
 };

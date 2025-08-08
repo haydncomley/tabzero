@@ -9,6 +9,8 @@ import { twitchStreamUserTimeout } from './twitch/user-timeout.tool';
 import { twitchStreamUserBan } from './twitch/user-ban.tool';
 import { openaiSimonSays } from './openai/simon-says.tool';
 import { twitchStreamChatSummary } from './twitch/analysis-chat-summary.tool copy';
+import { twitchStreamUserCallout } from './twitch/user-callout.tool';
+import { twitchStreamUserCheerTTS } from './twitch/user-cheer-tts.tool';
 
 export const TOOLS: tabzeroTool<any>[] = [
 	openaiAnswerQuestion,
@@ -21,4 +23,6 @@ export const TOOLS: tabzeroTool<any>[] = [
 	twitchStreamChangeChatSettings,
 	twitchStreamUserTimeout,
 	twitchStreamUserBan,
+	twitchStreamUserCallout,
+	twitchStreamUserCheerTTS,
 ];

@@ -61,9 +61,14 @@ export const useHotkey = (
 		setHotkeys({ ...hotkeys, [name]: keys });
 	};
 
+	const trigger = () => {
+		window.ipcRenderer.broadcast('hotkey', name);
+	};
+
 	return {
 		remap,
 		keys: hotkeys[name],
 		rebindSuccess,
+		trigger,
 	};
 };

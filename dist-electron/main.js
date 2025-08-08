@@ -7344,6 +7344,9 @@ const Ln = new g0({
         case "clipStream":
           e.webContents.send("hotkey", "clipStream");
           break;
+        case "userCallout":
+          e.webContents.send("hotkey", "userCallout");
+          break;
       }
     }), r.on("close", () => {
       console.log("[WS] Plugin disconnected"), qt(e, "streamDeck", !1);

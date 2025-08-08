@@ -4,6 +4,7 @@ import { ChatClient } from '@twurple/chat';
 import { createContext, useEffect, useContext, useState } from 'react';
 
 import { useAuth } from '../use-auth';
+import { useToolResolver } from '../use-tool-resolver';
 
 export const getTwitch = (token: string) => {
 	const provider = new StaticAuthProvider(
@@ -21,6 +22,7 @@ export const twitchContext = createContext<{
 		user: string;
 		message: string;
 		id: string;
+		reward?: string;
 	}[];
 }>({
 	isLive: false,
@@ -39,6 +41,7 @@ export const TwitchProvider = ({ children }: { children: React.ReactNode }) => {
 			id: string;
 		}[]
 	>([]);
+	const { resolveTools, runTools } = useToolResolver();
 
 	useEffect(() => {
 		if (!details) {
@@ -64,11 +67,54 @@ export const TwitchProvider = ({ children }: { children: React.ReactNode }) => {
 		});
 
 		chatClient.connect();
-		chatClient.onMessage((_channel, user, message, msg) => {
-			setChatMessages((prev) => [
-				{ user, message, id: msg.id },
-				...prev.slice(-100),
-			]);
+		chatClient.onMessage(async (_channel, user, message, msg) => {
+			if (msg.rewardId) {
+				// Get broadcaster ID for API call
+				const broadcaster = await twitch.users.getUserByName(details.user_name);
+				if (!broadcaster) {
+					setChatMessages((prev) => [
+						{ user, message, id: msg.id },
+						...prev.slice(-100),
+					]);
+					return;
+				}
+
+				// Fetch reward info
+				const rewards = await twitch.channelPoints.getCustomRewards(
+					broadcaster.id,
+				);
+				const reward = rewards.find((r) => r.id === msg.rewardId);
+				const rewardsToTriggerOn = details.preferences?.bitsTTS
+					?.split(',')
+					.map((r) => r.trim());
+				const isTTSReward =
+					reward &&
+					rewardsToTriggerOn?.length &&
+					rewardsToTriggerOn?.includes(reward?.title ?? '');
+
+				if (isTTSReward && reward) {
+					setChatMessages((prev) => [
+						{ user, message, id: msg.id, reward: reward.title },
+						...prev.slice(-100),
+					]);
+					resolveTools({
+						transcription: `Cheer TTS: @${user} - ${message}`,
+					}).then((action) => {
+						if (!action) return;
+						runTools({ action });
+					});
+				} else {
+					setChatMessages((prev) => [
+						{ user, message, id: msg.id },
+						...prev.slice(-100),
+					]);
+				}
+			} else {
+				setChatMessages((prev) => [
+					{ user, message, id: msg.id },
+					...prev.slice(-100),
+				]);
+			}
 		});
 
 		return () => {

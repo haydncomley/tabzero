@@ -34,6 +34,22 @@
 				}
 			],
 			"DisableAutomaticStates": true
+		},
+		{
+			"Name": "User Callout",
+			"UUID": "com.haydn-comley.tabzero.callout",
+			"Icon": "imgs/actions/callout/icon",
+			"Tooltip": "Callout a user in the chat.",
+			"PropertyInspectorPath": "ui/clip.html",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/callout/disconnected"
+				}
+			],
+			"DisableAutomaticStates": true
 		}
 	],
 	"Category": "tabzero",

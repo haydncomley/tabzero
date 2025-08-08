@@ -20,6 +20,7 @@ export type tabzeroUser = {
 	preferences?: {
 		voiceTone?: string;
 		voiceGender?: 'male' | 'female';
+		bitsTTS?: string;
 	};
 	stripe_customer_id?: string;
 	stripe_subscription_id?: string;

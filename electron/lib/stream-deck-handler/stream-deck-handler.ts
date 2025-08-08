@@ -38,6 +38,9 @@ export const initStreamDeckHandler = (window: BrowserWindow) => {
 				case 'clipStream':
 					window.webContents.send('hotkey', 'clipStream');
 					break;
+				case 'userCallout':
+					window.webContents.send('hotkey', 'userCallout');
+					break;
 			}
 		});
 

@@ -28,6 +28,7 @@ declare global {
 				isListening: boolean;
 				isLoading: boolean;
 			}) => Promise<void>;
+			broadcast: (name: string, ...args: any[]) => Promise<void>;
 		};
 	}
 }

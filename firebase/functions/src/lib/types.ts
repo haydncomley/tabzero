@@ -24,6 +24,7 @@ export interface tabzeroUser {
 	preferences?: {
 		voiceTone?: string;
 		voiceGender?: 'male' | 'female';
+		bitsTTS?: string;
 	};
 	timestamp_last: Timestamp;
 	timestamp_created: Timestamp;

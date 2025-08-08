@@ -7,4 +7,8 @@ export const HOTKEYS = {
 		name: 'Clip',
 		keys: 'CommandOrControl+Shift+]',
 	},
+	userCallout: {
+		name: 'User Callout',
+		keys: 'CommandOrControl+Shift+\\',
+	},
 } as const;

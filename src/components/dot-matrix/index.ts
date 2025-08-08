@@ -1,1 +1,1 @@
-export { DotMatrix } from "./dot-matrix";
+export { DotMatrix } from './dot-matrix';

@@ -10,7 +10,7 @@ export const auth = getAuth(app);
 export const storage = getStorage(app);
 
 export const CONFIG = {
-	version: '0.1.7',
+	version: '0.1.8',
 };
 
 export const MIN_INSTANCES = 1;

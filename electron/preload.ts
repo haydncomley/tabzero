@@ -39,4 +39,7 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
 	sendToStreamDeck(options: { isListening: boolean; isLoading: boolean }) {
 		return ipcRenderer.invoke('send-to-stream-deck', options);
 	},
+	broadcast(name: string, ...args: any[]) {
+		return ipcRenderer.invoke(name, ...args);
+	},
 });

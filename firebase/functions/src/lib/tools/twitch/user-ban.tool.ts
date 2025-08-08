@@ -34,7 +34,7 @@ export const twitchStreamUserBan = {
 		const openai = getOpenAI();
 
 		const response = await openai.chat.completions.create({
-			model: 'gpt-3.5-turbo',
+			model: 'gpt-5-mini',
 			messages: [
 				{
 					role: 'system',
@@ -81,10 +81,9 @@ export const twitchStreamUserBan = {
 				user: userToBan.id,
 				reason: context,
 			});
-			openai.shutdownAsync;
 			return {
 				success: true,
-				message: `Banned @${userName}`,
+				message: `Banned: ${userName}`,
 				link: `https://www.twitch.tv/${userName}`,
 			};
 		} catch (error) {

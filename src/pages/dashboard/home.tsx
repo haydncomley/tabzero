@@ -66,6 +66,16 @@ export default function Page() {
 		});
 	});
 
+	useHotkey('userCallout', () => {
+		play(SOUND_ON);
+		resolveTools({ transcription: 'Callout a user in chat.' }).then(
+			(action) => {
+				if (!action) return;
+				runTools({ action });
+			},
+		);
+	});
+
 	const isLoading =
 		isResolvingTools ||
 		isRecordingDebounced ||
@@ -145,7 +155,12 @@ export default function Page() {
 						{chatMessages.map((message) => (
 							<div
 								key={message.id}
-								className="flex flex-col p-3 px-4 not-last:border-b"
+								className={classNames(
+									'flex flex-col p-3 px-4 not-last:border-b',
+									{
+										'bg-brand text-brand-foreground': message.reward,
+									},
+								)}
 							>
 								<p className="text-sm font-bold">{message.user}</p>
 								<p className="text-sm">{message.message}</p>

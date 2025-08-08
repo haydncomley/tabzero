@@ -42,6 +42,8 @@ export default function Page() {
 		isLoggingOut,
 		updateVoice,
 		isUpdatingVoice,
+		updateBitsTTS,
+		isUpdatingBitsTTS,
 	} = useAuth();
 	const { isStreamDeckConnected } = useStreamDeck();
 	const { speak, isLoadingSpeech } = useAudioPlayer();
@@ -55,15 +57,23 @@ export default function Page() {
 	const [voiceTone, setVoiceTone] = useState<string | undefined>(
 		details?.preferences?.voiceTone,
 	);
+	const [bitsTTS, setBitsTTS] = useState<string | undefined>(
+		details?.preferences?.bitsTTS,
+	);
 
 	useEffect(() => {
 		setVoiceGender(details?.preferences?.voiceGender);
 		setVoiceTone(details?.preferences?.voiceTone);
 	}, [details?.preferences?.voiceGender, details?.preferences?.voiceTone]);
 
+	useEffect(() => {
+		setBitsTTS(details?.preferences?.bitsTTS);
+	}, [details?.preferences?.bitsTTS]);
+
 	const hasVoiceChanges =
 		details?.preferences?.voiceGender !== voiceGender ||
 		details?.preferences?.voiceTone !== voiceTone;
+	const hasBitsTTSChanges = details?.preferences?.bitsTTS !== bitsTTS;
 
 	return (
 		<main className="relative flex !flex-row">
@@ -136,10 +146,9 @@ export default function Page() {
 					{/* Stream Deck */}
 					<div className="flex flex-col gap-1 py-4">
 						<div className="flex flex-col">
-							<label className="text-sm font-bold">Stream Deck</label>
+							<label className="text-md font-bold">Stream Deck</label>
 							<p className="text-foreground/75 text-sm">
 								Get the{' '}
-								{/* TODO: Update this link to the new streamdeck plugin when its available */}
 								<Link
 									to="https://marketplace.elgato.com/search?q=tabzero"
 									target="_blank"
@@ -171,7 +180,7 @@ export default function Page() {
 					{/* Theme */}
 					<div className="flex flex-col gap-2 py-4">
 						<div className="flex flex-col">
-							<label className="text-sm font-bold">Theme</label>
+							<label className="text-md font-bold">Theme</label>
 							<p className="text-foreground/75 text-sm">
 								Change the theme of the app to match your system.
 							</p>
@@ -197,7 +206,7 @@ export default function Page() {
 					{/* AI Voice */}
 					<div className="flex flex-col gap-2 py-4">
 						<div className="flex flex-col">
-							<label className="text-sm font-bold">AI Voice Settings</label>
+							<label className="text-md font-bold">AI Voice Settings</label>
 							<p className="text-foreground/75 text-sm">
 								Save your changes in order to test how the AI will sound.
 							</p>
@@ -265,10 +274,49 @@ export default function Page() {
 						</div>
 					</div>
 
+					{/* User Bits Callout */}
+					<div className="flex flex-col gap-2 py-4">
+						<div className="flex flex-col">
+							<label className="text-md font-bold">Cheer text-to-speech</label>
+							<p className="text-foreground/75 text-sm">
+								Users can prompt the AI to say text-to-speech messages using
+								their channel points.
+							</p>
+						</div>
+						<div className="flex gap-2">
+							<div className="flex w-full flex-col gap-2">
+								<input
+									type="text"
+									placeholder={
+										'Reward names (comma separated). E.g. "AI Text-to-speech", or "Highlight My Message,TTS,AI Speech"'
+									}
+									className="border-outline placeholder:text-foreground/75 dark:placeholder:text-background/50 h-full min-h-full w-full resize-y rounded-md border p-2 text-sm"
+									value={bitsTTS}
+									onChange={(e) => setBitsTTS(e.target.value)}
+								/>
+							</div>
+							<div className="flex flex-col gap-2">
+								<Button
+									variant="primary"
+									loading={isUpdatingBitsTTS}
+									disabled={!hasBitsTTSChanges || isUpdatingBitsTTS}
+									onClick={() => {
+										updateBitsTTS({
+											bitsTTS,
+										});
+									}}
+								>
+									<Save className="h-4 w-4"></Save>
+									Save
+								</Button>
+							</div>
+						</div>
+					</div>
+
 					{/* Refer a friend */}
 					<div className="flex flex-col gap-2 py-4">
 						<div className="flex flex-col">
-							<label className="text-sm font-bold">Refer a friend</label>
+							<label className="text-md font-bold">Refer a friend</label>
 							<p className="text-foreground/75 text-sm">
 								Share a referral link with your friends and community
 							</p>
