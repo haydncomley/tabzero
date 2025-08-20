@@ -26,7 +26,7 @@ export const openaiSimonSays = {
 		const openai = getOpenAI();
 
 		const response = await openai.chat.completions.create({
-			model: 'gpt-5-mini',
+			model: 'gpt-5-nano',
 			messages: [
 				{
 					role: 'system',

@@ -43,6 +43,7 @@ export default function Page() {
 	const { isStreamDeckConnected } = useStreamDeck();
 	const [showInfo, setShowInfo] = useState(false);
 	const [prompt, setPrompt] = useState('');
+	const [transcription, setTranscription] = useState<string | null>(null);
 
 	const isRecordingDebounced = useDebounce(
 		state === 'recording',
@@ -108,12 +109,14 @@ export default function Page() {
 	useEffect(() => {
 		if (!audioUrl) return;
 		transcribe().then((transcription) => {
+			setTranscription(transcription);
 			if (!transcription) return;
 			sendPrompt(transcription);
 		});
 	}, [audioUrl]);
 
 	useEffect(() => {
+		if (state === 'recording') setTranscription(null);
 		window.ipcRenderer.sendToStreamDeck({
 			isListening: state === 'recording',
 			isLoading: isLoadingResolver,
@@ -128,7 +131,13 @@ export default function Page() {
 					<EventLog
 						date="Just Now"
 						isLoading
-						text={state === 'recording' ? 'Listening...' : 'Working...'}
+						text={
+							state === 'recording'
+								? 'Listening...'
+								: transcription
+									? `"${transcription}"...`
+									: 'Transcribing...'
+						}
 					></EventLog>
 				) : null}
 				{!log.length && !isLoadingResolver ? (

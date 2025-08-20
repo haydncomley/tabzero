@@ -1,5 +1,5 @@
 import { Timestamp } from 'firebase-admin/firestore';
-import { ChatCompletionMessageToolCall } from 'openai/resources/index.mjs';
+import { ChatCompletionMessageFunctionToolCall } from 'openai/resources/chat/completions/completions.js';
 import type { z } from 'zod';
 
 type Vendor = 'twitch';
@@ -68,7 +68,7 @@ export type tabzeroToolAction = {
 		name: string;
 		context: string;
 		status: 'pending' | 'success' | 'error';
-		details: ChatCompletionMessageToolCall.Function;
+		details: ChatCompletionMessageFunctionToolCall.Function;
 		tts?: string;
 		link?: string;
 	}[];

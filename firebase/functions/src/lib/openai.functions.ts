@@ -4,7 +4,6 @@ import { writeFile, remove } from 'fs-extra';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { getOpenAI } from '../vendor/openai.vendor';
-import { ChatCompletionMessageToolCall } from 'openai/resources/index.mjs';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { TOOLS } from './tools';
@@ -19,12 +18,11 @@ import {
 } from '../config';
 import { FieldValue } from 'firebase-admin/firestore';
 import { tabzeroUser } from './types';
+import { ChatCompletionMessageToolCall, ChatCompletion } from 'openai/resources/chat/completions.js';
 
 export const aiChat = onCall(
 	{
 		secrets: [openaiKey, langfuseKey, langfusePublicKey, langfuseHost],
-		minInstances: MIN_INSTANCES,
-		maxInstances: MAX_INSTANCES,
 	},
 	async (request) => {
 		if (!request.auth)
@@ -35,7 +33,7 @@ export const aiChat = onCall(
 
 		const openai = getOpenAI();
 		const response = await openai.chat.completions.create({
-			model: 'gpt-5',
+			model: 'gpt-5-mini',
 			messages: [{ role: 'user', content: prompt }],
 		});
 
@@ -57,26 +55,76 @@ export const aiTranscribe = onCall(
 		if (!request.auth)
 			throw new HttpsError('unauthenticated', 'User must be authenticated');
 
-		const { audio } = request.data;
+		const { audio, format = 'wav' } = request.data;
 		if (!audio) throw new HttpsError('invalid-argument', 'Missing audio');
 
 		const openai = getOpenAI();
-		const audioBuffer = Buffer.from(audio, 'base64');
-		const tempPath = join(tmpdir(), 'audio.ogg');
-
+		
 		try {
-			await writeFile(tempPath, audioBuffer);
-			const response = await openai.audio.transcriptions.create({
-				model: 'whisper-1',
-				file: createReadStream(tempPath),
-				language: 'en',
+			// GPT-4o mini supports audio input through chat completions API
+			// The audio needs to be in base64 format
+			
+			// Use GPT-4o mini with audio input capability
+			const response = await openai.chat.completions.create({
+				model: 'gpt-4o-mini',
+				messages: [
+					{
+						role: 'user',
+						content: [
+							{
+								type: 'text',
+								text: 'Please transcribe the following audio accurately. Return only the transcription without any additional commentary.',
+							},
+							{
+								type: 'input_audio',
+								input_audio: {
+									data: audio,
+									format: format,
+								},
+							},
+						],
+					},
+				],
+				// Enable audio transcription mode
+				modalities: ['text'],
+				audio: {
+					voice: 'alloy',
+					format: 'wav',
+				},
 			});
 
-			return { text: response.text };
+			const transcription = response.choices[0].message.content;
+			
+			return { 
+				text: transcription,
+				model: 'gpt-4o-mini',
+				usage: response.usage,
+			};
 		} catch (err) {
-			throw new HttpsError('internal', 'Failed to transcribe audio');
-		} finally {
-			await remove(tempPath).catch(() => {});
+			console.error('Transcription error:', err);
+			
+			// Fallback to Whisper if GPT-4o mini audio fails
+			try {
+				const audioBuffer = Buffer.from(audio, 'base64');
+				const tempPath = join(tmpdir(), `audio.${format}`);
+				
+				await writeFile(tempPath, audioBuffer);
+				const whisperResponse = await openai.audio.transcriptions.create({
+					model: 'whisper-1',
+					file: createReadStream(tempPath),
+					language: 'en',
+				});
+				
+				await remove(tempPath).catch(() => {});
+				
+				return { 
+					text: whisperResponse.text,
+					model: 'whisper-1',
+					fallback: true,
+				};
+			} catch (fallbackErr) {
+				throw new HttpsError('internal', 'Failed to transcribe audio');
+			}
 		}
 	},
 );
@@ -146,11 +194,15 @@ export const aiToolResolver = onCall(
 			prompt: string,
 			toolsAlreadyUsed: ChatCompletionMessageToolCall[],
 		) => {
-			const response = await openai.chat.completions.create({
-				model: 'gpt-5-mini',
+			const response: ChatCompletion = await openai.chat.completions.create({
+				model: 'gpt-5-nano',
+				reasoning_effort: prompt.length < 50 ? 'minimal' : 'medium',
+				max_completion_tokens: prompt.length < 50 ? 256 : undefined,
+				parallel_tool_calls: true,
 				messages: [
 					{ role: 'user', content: prompt },
 					...toolsAlreadyUsed
+						.filter((tool) => tool.type === 'function')
 						.map((tool) => [
 							{
 								role: 'assistant' as const,
@@ -198,7 +250,7 @@ export const aiToolResolver = onCall(
 			name: 'Transcription',
 			text: prompt,
 			timestamp: FieldValue.serverTimestamp(),
-			tools: tools.map((tool) => ({
+			tools: tools.filter((tool) => tool.type === 'function').map((tool) => ({
 				...TOOLS.find((t) => t.name === tool.function.name)?.clientDetails(
 					JSON.parse(tool.function.arguments),
 				),

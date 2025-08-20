@@ -28,7 +28,16 @@ export const EventLog = ({ date, text, tools, isLoading }: EventLogProps) => {
 		<div className="flex flex-col gap-4 border-b pb-4">
 			<div className="flex flex-col">
 				{date ? <p className="text-xs opacity-75">{date}</p> : null}
-				<p className="text-sm">{isLoading ? text : `"${text}"`}</p>
+				<p
+					className={classNames('flex items-center gap-1.5 text-sm', {
+						'animate-fade': isLoading,
+					})}
+				>
+					{isLoading ? (
+						<Loader2 className="h-4 w-4 animate-spin"></Loader2>
+					) : null}
+					{isLoading ? text : `"${text}"`}
+				</p>
 			</div>
 
 			{tools?.length ? (

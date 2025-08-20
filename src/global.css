@@ -32,6 +32,16 @@
 			transform: scale(1);
 		}
 	}
+
+	--animate-fade: fade 01s ease-in-out infinite alternate;
+	@keyframes fade {
+		0% {
+			opacity: 0.25;
+		}
+		100% {
+			opacity: 0.75;
+		}
+	}
 }
 
 /* Always dark mode for now, will do themes later */

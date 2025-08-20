@@ -26,7 +26,8 @@ import { useStreamDeck } from '~/hooks/use-stream-deck';
 const TEST_PHRASE = [
 	'Hello there, tabzero reporting for duty and ready to assist you.',
 	'Lets get this stream started and pump those viewing numbers up.',
-	'Howdy partner, this is your rootin tootin assistant here to help.',
+	'tabzero is here to help you with your stream.',
+	'Testing testing, one, two, three - tab zero is setup and ready to go.',
 ];
 
 export default function Page() {

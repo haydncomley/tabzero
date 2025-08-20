@@ -51,7 +51,7 @@ export const twitchStreamChatSummary = {
 			`;
 
 		const response = await openai.chat.completions.create({
-			model: 'gpt-5',
+			model: 'gpt-5-nano',
 			messages: [
 				{
 					role: 'system',
